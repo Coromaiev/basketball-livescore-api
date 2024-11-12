@@ -10,7 +10,6 @@ public class User
         Admin
     }
 
-
     public int ID { get; set; }
     [Required]
     [MaxLength(250)]

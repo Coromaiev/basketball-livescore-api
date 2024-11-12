@@ -24,9 +24,9 @@ public class Fault : MatchEvent
     }
 
     [Required]
-    public required FaultType Type { get; set; }
+    public FaultType Type { get; set; }
     [Required]
-    public required Player FaultyPlayer { get; set; }
+    public Player FaultyPlayer { get; set; }
 
     public string FaultTypeToString(FaultType type)
     {
@@ -50,7 +50,7 @@ public class TimeOut : MatchEvent
     [Required]
     public int InvokerID { get; set; }
     [Required]
-    public required Team Invoker { get; set; }
+    public Team Invoker { get; set; }
 }
 
 public class ScoreChange : MatchEvent
@@ -63,15 +63,15 @@ public class ScoreChange : MatchEvent
     }
 
     [Required]
-    public required Points Score { get; set; }
+    public Points Score { get; set; }
     [Required]
-    public required Player Scorer { get; set; }
+    public Player Scorer { get; set; }
 }
 
 public class PlayerChange : MatchEvent
 {
     [Required]
-    public required Player LeavingPlayer { get; set; }
+    public Player LeavingPlayer { get; set; }
     [Required]
-    public required Player ReplacingPlayer { get; set; }
+    public Player ReplacingPlayer { get; set; }
 }
