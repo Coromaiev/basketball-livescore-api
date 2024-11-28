@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BasketBall_LiveScore.Models;
 public class User
@@ -21,5 +22,6 @@ public class User
     [Required]
     public string Email { get; set; } = string.Empty;
     [Required]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public Role Permission { get; set; } = Role.None;
 }

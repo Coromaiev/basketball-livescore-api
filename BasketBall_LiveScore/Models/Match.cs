@@ -23,4 +23,6 @@ public class Match
     public User? PlayEncoder { get; set; }
     [Required]
     public List<MatchEvent> Events { get; set; } = new();
+    public List<Player> VisitorsStartingPlayers = new(5);
+    public List<Player> HostsStartingPlayers = new(5);
 }

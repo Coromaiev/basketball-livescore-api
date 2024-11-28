@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BasketBall_LiveScore.Models;
 public abstract class MatchEvent
@@ -24,6 +25,7 @@ public class Fault : MatchEvent
     }
 
     [Required]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public FaultType Type { get; set; }
     [Required]
     public Player FaultyPlayer { get; set; }
@@ -64,6 +66,7 @@ public class ScoreChange : MatchEvent
     }
 
     [Required]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public Points Score { get; set; }
     [Required]
     public Player Scorer { get; set; }

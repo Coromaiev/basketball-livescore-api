@@ -41,6 +41,14 @@ namespace BasketBall_LiveScore
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Match>()
+                .HasMany(match => match.HostsStartingPlayers)
+                .WithMany();
+
+            modelBuilder.Entity<Match>()
+                .HasMany(match => match.VisitorsStartingPlayers)
+                .WithMany();
+
+            modelBuilder.Entity<Match>()
                 .HasOne(match => match.Visitors)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
