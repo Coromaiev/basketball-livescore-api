@@ -13,10 +13,47 @@ namespace BasketBall_LiveScore
         public DbSet<Team> Teams { get; set; }
         public DbSet<Match> Matchs { get; set; }
         public DbSet<MatchEvent> MatchEvents { get; set; }
+        public DbSet<Fault> Faults { get; set; }
+        public DbSet<TimeOut> TimeOuts { get; set; }
+        public DbSet<ScoreChange> ScoreChanges { get; set; }
+        public DbSet<PlayerChange> PlayerChanges { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
+            modelBuilder.Entity<Fault>().HasBaseType<MatchEvent>();
+            modelBuilder.Entity<TimeOut>().HasBaseType<MatchEvent>();
+            modelBuilder.Entity<ScoreChange>().HasBaseType<MatchEvent>();
+            modelBuilder.Entity<PlayerChange>().HasBaseType<MatchEvent>();
+
+            modelBuilder.Entity<Match>()
+                .HasOne(match => match.PlayEncoder)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Match>()
+                .HasOne(match => match.PrepEncoder)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Match>()
+                .HasOne(match => match.Hosts)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Match>()
+                .HasOne(match => match.Visitors)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PlayerChange>()
+                .HasOne(change => change.LeavingPlayer)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PlayerChange>()
+                .HasOne(change => change.ReplacingPlayer)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);            
         }
     }
 
