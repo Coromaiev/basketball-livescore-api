@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BasketBall_LiveScore;
+namespace BasketBall_LiveScore.Models;
 public abstract class MatchEvent
 {
     [Required]
@@ -30,7 +30,8 @@ public class Fault : MatchEvent
 
     public string FaultTypeToString(FaultType type)
     {
-        switch(type) {
+        switch (type)
+        {
             case FaultType.P0:
                 return "P0";
             case FaultType.P1:

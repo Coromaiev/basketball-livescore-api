@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BasketBall_LiveScore;
+namespace BasketBall_LiveScore.Models;
 public class User
 {
 
     public enum Role
     {
         None,
+        Encoder,
         Admin
     }
 
@@ -20,5 +21,5 @@ public class User
     [Required]
     public string Email { get; set; } = string.Empty;
     [Required]
-    public Role Permission { get; set; } = User.Role.None;
+    public Role Permission { get; set; } = Role.None;
 }

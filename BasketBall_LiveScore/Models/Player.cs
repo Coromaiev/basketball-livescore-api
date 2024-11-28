@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BasketBall_LiveScore;
+namespace BasketBall_LiveScore.Models;
 public class Player
 {
     public int Id { get; set; }
