@@ -12,16 +12,18 @@ public class User
         Admin
     }
 
-    public int ID { get; set; }
     [Required]
-    [MaxLength(250)]
+    public ulong Id { get; set; }
+    [MaxLength(255)]
+    [Required]
     public string Username { get; set; } = string.Empty;
-    [Required]
     [MaxLength(50)]
+    [Required]
     public string Password { get; set; } = string.Empty;
     [Required]
+    [MaxLength(255)]
     public string Email { get; set; } = string.Empty;
-    [Required]
     [JsonConverter(typeof(JsonStringEnumConverter))]
+    [Required]
     public Role Permission { get; set; } = Role.None;
 }
