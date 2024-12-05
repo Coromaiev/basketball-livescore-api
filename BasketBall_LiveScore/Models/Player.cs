@@ -3,18 +3,18 @@
 namespace BasketBall_LiveScore.Models;
 public class Player
 {
-    public int Id { get; set; }
-    [Required]
+    public ulong Id { get; set; }
     [MaxLength(70)]
-    public string FirstName { get; set; } = string.Empty;
     [Required]
+    public string FirstName { get; set; } = string.Empty;
     [MaxLength(100)]
+    [Required]
     public string LastName { get; set; } = string.Empty;
     [Required]
-    public int TeamId { get; set; }
+    public ulong TeamId { get; set; }
     [Required]
-    public byte Number { get; set; }
+    public byte Number { get; set; } = byte.MinValue;
     [Required]
-    public Team? Team { get; set; }
+    public Team? Team { get; set; } = null;
 
 }

@@ -56,12 +56,32 @@ namespace BasketBall_LiveScore
             modelBuilder.Entity<PlayerChange>()
                 .HasOne(change => change.LeavingPlayer)
                 .WithMany()
+                .HasForeignKey(change => change.LeavingPlayerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PlayerChange>()
                 .HasOne(change => change.ReplacingPlayer)
                 .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);            
+                .HasForeignKey(change => change.ReplacingPlayerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ScoreChange>()
+                .HasOne(scoreChange => scoreChange.Scorer)
+                .WithMany()
+                .HasForeignKey(scoreChange => scoreChange.ScorerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TimeOut>()
+                .HasOne(timeOut => timeOut.Invoker)
+                .WithMany()
+                .HasForeignKey(timeOut => timeOut.InvokerID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Fault>()
+                .HasOne(fault => fault.FaultyPlayer)
+                .WithMany()
+                .HasForeignKey(fault => fault.FaultyPlayerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 

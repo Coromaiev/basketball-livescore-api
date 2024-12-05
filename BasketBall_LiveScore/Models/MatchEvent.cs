@@ -1,17 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace BasketBall_LiveScore.Models;
 public abstract class MatchEvent
 {
+    public ulong Id { get; set; }    
+    [Column(TypeName = "decimal(8,2)")]
     [Required]
     public decimal Time { get; set; }
     [Required]
     public byte QuarterNumber { get; set; }
     [Required]
-    public int MatchID { get; set; }
+    public ulong MatchID { get; set; }
     [Required]
-    public Match? Match { get; set; }
+    public Match? Match { get; set; } = null;
 }
 
 public class Fault : MatchEvent
@@ -27,6 +31,8 @@ public class Fault : MatchEvent
     [Required]
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public FaultType Type { get; set; }
+    [Required]
+    public ulong FaultyPlayerId { get; set; }
     [Required]
     public Player FaultyPlayer { get; set; }
 
@@ -51,7 +57,7 @@ public class Fault : MatchEvent
 public class TimeOut : MatchEvent
 {
     [Required]
-    public int InvokerID { get; set; }
+    public ulong InvokerID { get; set; } 
     [Required]
     public Team Invoker { get; set; }
 }
@@ -69,13 +75,19 @@ public class ScoreChange : MatchEvent
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public Points Score { get; set; }
     [Required]
+    public ulong ScorerId { get; set; }
+    [Required]
     public Player Scorer { get; set; }
 }
 
 public class PlayerChange : MatchEvent
 {
     [Required]
+    public ulong LeavingPlayerId { get; set; }
+    [Required]
     public Player LeavingPlayer { get; set; }
+    [Required]
+    public ulong ReplacingPlayerId { get; set; }
     [Required]
     public Player ReplacingPlayer { get; set; }
 }

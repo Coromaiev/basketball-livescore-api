@@ -4,6 +4,8 @@ namespace BasketBall_LiveScore.Models;
 public class Match
 {
     [Required]
+    public ulong Id { get; set; }
+    [Required]
     public byte QuarterDuration { get; set; }
     [Required]
     public byte NumberOfQuarters { get; set; }
@@ -14,9 +16,9 @@ public class Match
     [Required]
     public Team? Hosts { get; set; }
     [Required]
-    public int? VisitorsID { get; set; }
+    public ulong? VisitorsID { get; set; }
     [Required]
-    public int? HostsID { get; set; }
+    public ulong? HostsID { get; set; }
     [Required]
     public User? PrepEncoder { get; set; }
     [Required]
@@ -25,7 +27,7 @@ public class Match
     public List<MatchEvent> Events { get; set; } = new();
     [Required]
     [MaxLength(5)]
-    public List<Player> VisitorsStartingPlayers = new(5);
+    public List<Player> VisitorsStartingPlayers = new(5); 
     [Required]
     [MaxLength(5)]
     public List<Player> HostsStartingPlayers = new(5);
