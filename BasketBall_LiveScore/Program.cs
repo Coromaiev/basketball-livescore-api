@@ -1,4 +1,4 @@
-using BasketBall_LiveScore;
+using BasketBall_LiveScore.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 

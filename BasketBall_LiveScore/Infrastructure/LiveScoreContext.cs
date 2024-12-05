@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace BasketBall_LiveScore
+namespace BasketBall_LiveScore.Infrastructure
 {
     public class LiveScoreContext : DbContext
     {
