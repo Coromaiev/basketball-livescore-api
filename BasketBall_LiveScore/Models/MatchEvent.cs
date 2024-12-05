@@ -1,11 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
-namespace BasketBall_LiveScore;
+namespace BasketBall_LiveScore.Models;
 public abstract class MatchEvent
 {
+    [Required]
     public decimal Time { get; set; }
+    [Required]
     public byte QuarterNumber { get; set; }
+    [Required]
     public int MatchID { get; set; }
+    [Required]
     public Match? Match { get; set; }
 }
 
@@ -19,12 +24,16 @@ public class Fault : MatchEvent
         P3
     }
 
-    public required FaultType Type { get; set; }
-    public required Player FaultyPlayer { get; set; }
+    [Required]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public FaultType Type { get; set; }
+    [Required]
+    public Player FaultyPlayer { get; set; }
 
     public string FaultTypeToString(FaultType type)
     {
-        switch(type) {
+        switch (type)
+        {
             case FaultType.P0:
                 return "P0";
             case FaultType.P1:
@@ -41,8 +50,10 @@ public class Fault : MatchEvent
 
 public class TimeOut : MatchEvent
 {
+    [Required]
     public int InvokerID { get; set; }
-    public required Team Invoker { get; set; }
+    [Required]
+    public Team Invoker { get; set; }
 }
 
 public class ScoreChange : MatchEvent
@@ -54,12 +65,17 @@ public class ScoreChange : MatchEvent
         Three = 3,
     }
 
-    public required Points Score { get; set; }
-    public required Player Scorer { get; set; }
+    [Required]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public Points Score { get; set; }
+    [Required]
+    public Player Scorer { get; set; }
 }
 
 public class PlayerChange : MatchEvent
 {
-    public required Player LeavingPlayer { get; set; }
-    public required Player ReplacingPlayer { get; set; }
+    [Required]
+    public Player LeavingPlayer { get; set; }
+    [Required]
+    public Player ReplacingPlayer { get; set; }
 }
