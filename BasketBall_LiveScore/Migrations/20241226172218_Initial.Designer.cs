@@ -4,6 +4,7 @@ using BasketBall_LiveScore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BasketBall_LiveScore.Migrations
 {
     [DbContext(typeof(LiveScoreContext))]
-    partial class LiveScoreContextModelSnapshot : ModelSnapshot
+    [Migration("20241226172218_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,10 +267,10 @@ namespace BasketBall_LiveScore.Migrations
                 {
                     b.HasBaseType("BasketBall_LiveScore.Models.MatchEvent");
 
-                    b.Property<decimal>("InvokerId")
+                    b.Property<decimal>("InvokerID")
                         .HasColumnType("decimal(20,0)");
 
-                    b.HasIndex("InvokerId");
+                    b.HasIndex("InvokerID");
 
                     b.HasDiscriminator().HasValue("TimeOut");
                 });
@@ -312,7 +315,7 @@ namespace BasketBall_LiveScore.Migrations
                     b.HasOne("BasketBall_LiveScore.Models.Match", "Match")
                         .WithMany("Events")
                         .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Match");
@@ -323,7 +326,7 @@ namespace BasketBall_LiveScore.Migrations
                     b.HasOne("BasketBall_LiveScore.Models.Team", "Team")
                         .WithMany("Players")
                         .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Team");
@@ -404,7 +407,7 @@ namespace BasketBall_LiveScore.Migrations
                 {
                     b.HasOne("BasketBall_LiveScore.Models.Team", "Invoker")
                         .WithMany()
-                        .HasForeignKey("InvokerId")
+                        .HasForeignKey("InvokerID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 

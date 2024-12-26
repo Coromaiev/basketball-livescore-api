@@ -7,13 +7,12 @@ namespace BasketBall_LiveScore.Models;
 public abstract class MatchEvent
 {
     public ulong Id { get; set; }    
-    [Column(TypeName = "decimal(8,2)")]
     [Required]
-    public decimal Time { get; set; }
+    public TimeSpan Time { get; set; }
     [Required]
     public byte QuarterNumber { get; set; }
     [Required]
-    public ulong MatchID { get; set; }
+    public ulong? MatchId { get; set; }
     [Required]
     public Match? Match { get; set; } = null;
 }
@@ -57,7 +56,7 @@ public class Fault : MatchEvent
 public class TimeOut : MatchEvent
 {
     [Required]
-    public ulong InvokerID { get; set; } 
+    public ulong InvokerId { get; set; } 
     [Required]
     public Team Invoker { get; set; }
 }

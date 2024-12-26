@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -70,26 +71,26 @@ namespace BasketBall_LiveScore.Migrations
                     QuarterDuration = table.Column<byte>(type: "tinyint", nullable: false),
                     NumberOfQuarters = table.Column<byte>(type: "tinyint", nullable: false),
                     TimeOutDuration = table.Column<byte>(type: "tinyint", nullable: false),
-                    VisitorsID = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
-                    HostsID = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    VisitorsId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    HostsId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     PrepEncoderId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
-                    PlayEncoderId = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
+                    PlayEncoderId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    HostsScore = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    VisitorsScore = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Matchs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Matchs_Teams_HostsID",
-                        column: x => x.HostsID,
+                        name: "FK_Matchs_Teams_HostsId",
+                        column: x => x.HostsId,
                         principalTable: "Teams",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Matchs_Teams_VisitorsID",
-                        column: x => x.VisitorsID,
+                        name: "FK_Matchs_Teams_VisitorsId",
+                        column: x => x.VisitorsId,
                         principalTable: "Teams",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Matchs_Users_PlayEncoderId",
                         column: x => x.PlayEncoderId,
@@ -110,9 +111,9 @@ namespace BasketBall_LiveScore.Migrations
                 {
                     Id = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Time = table.Column<decimal>(type: "decimal(8,2)", nullable: false),
+                    Time = table.Column<TimeSpan>(type: "time", nullable: false),
                     QuarterNumber = table.Column<byte>(type: "tinyint", nullable: false),
-                    MatchID = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    MatchId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     Type = table.Column<int>(type: "int", nullable: true),
                     FaultyPlayerId = table.Column<decimal>(type: "decimal(20,0)", nullable: true),
@@ -126,8 +127,8 @@ namespace BasketBall_LiveScore.Migrations
                 {
                     table.PrimaryKey("PK_MatchEvents", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MatchEvents_Matchs_MatchID",
-                        column: x => x.MatchID,
+                        name: "FK_MatchEvents_Matchs_MatchId",
+                        column: x => x.MatchId,
                         principalTable: "Matchs",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -135,32 +136,27 @@ namespace BasketBall_LiveScore.Migrations
                         name: "FK_MatchEvents_Players_FaultyPlayerId",
                         column: x => x.FaultyPlayerId,
                         principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MatchEvents_Players_LeavingPlayerId",
                         column: x => x.LeavingPlayerId,
                         principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MatchEvents_Players_ReplacingPlayerId",
                         column: x => x.ReplacingPlayerId,
                         principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MatchEvents_Players_ScorerId",
                         column: x => x.ScorerId,
                         principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MatchEvents_Teams_InvokerID",
                         column: x => x.InvokerID,
                         principalTable: "Teams",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -227,9 +223,9 @@ namespace BasketBall_LiveScore.Migrations
                 column: "LeavingPlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MatchEvents_MatchID",
+                name: "IX_MatchEvents_MatchId",
                 table: "MatchEvents",
-                column: "MatchID");
+                column: "MatchId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MatchEvents_ReplacingPlayerId",
@@ -252,9 +248,9 @@ namespace BasketBall_LiveScore.Migrations
                 column: "VisitorsStartingPlayersId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Matchs_HostsID",
+                name: "IX_Matchs_HostsId",
                 table: "Matchs",
-                column: "HostsID");
+                column: "HostsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Matchs_PlayEncoderId",
@@ -267,9 +263,9 @@ namespace BasketBall_LiveScore.Migrations
                 column: "PrepEncoderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Matchs_VisitorsID",
+                name: "IX_Matchs_VisitorsId",
                 table: "Matchs",
-                column: "VisitorsID");
+                column: "VisitorsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Players_TeamId",

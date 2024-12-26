@@ -16,13 +16,21 @@ public class Match
     [Required]
     public Team? Hosts { get; set; }
     [Required]
-    public ulong? VisitorsID { get; set; }
+    public ulong? VisitorsId { get; set; }
     [Required]
-    public ulong? HostsID { get; set; }
+    public ulong? HostsId { get; set; }
     [Required]
     public User? PrepEncoder { get; set; }
     [Required]
     public User? PlayEncoder { get; set; }
+    [Required]
+    public ulong? PrepEncoderId { get; set; }
+    [Required]
+    public ulong? PlayEncoderId { get; set; }
+    [Required]
+    public ulong HostsScore { get; set; } = 0;
+    [Required]
+    public ulong? VisitorsScore { get; set; } = 0;
     [Required]
     public List<MatchEvent> Events { get; set; } = new();
     [Required]
