@@ -15,8 +15,7 @@ namespace BasketBall_LiveScore.Migrations
                 name: "Teams",
                 columns: table => new
                 {
-                    Id = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
                 },
                 constraints: table =>
@@ -28,8 +27,7 @@ namespace BasketBall_LiveScore.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Password = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
@@ -44,11 +42,10 @@ namespace BasketBall_LiveScore.Migrations
                 name: "Players",
                 columns: table => new
                 {
-                    Id = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(70)", maxLength: 70, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    TeamId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    TeamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Number = table.Column<byte>(type: "tinyint", nullable: false)
                 },
                 constraints: table =>
@@ -58,23 +55,21 @@ namespace BasketBall_LiveScore.Migrations
                         name: "FK_Players_Teams_TeamId",
                         column: x => x.TeamId,
                         principalTable: "Teams",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "Matchs",
                 columns: table => new
                 {
-                    Id = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     QuarterDuration = table.Column<byte>(type: "tinyint", nullable: false),
                     NumberOfQuarters = table.Column<byte>(type: "tinyint", nullable: false),
                     TimeOutDuration = table.Column<byte>(type: "tinyint", nullable: false),
-                    VisitorsId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
-                    HostsId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
-                    PrepEncoderId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
-                    PlayEncoderId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    VisitorsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    HostsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PrepEncoderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PlayEncoderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     HostsScore = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
                     VisitorsScore = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
                 },
@@ -109,19 +104,18 @@ namespace BasketBall_LiveScore.Migrations
                 name: "MatchEvents",
                 columns: table => new
                 {
-                    Id = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Time = table.Column<TimeSpan>(type: "time", nullable: false),
                     QuarterNumber = table.Column<byte>(type: "tinyint", nullable: false),
-                    MatchId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
+                    MatchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     Type = table.Column<int>(type: "int", nullable: true),
-                    FaultyPlayerId = table.Column<decimal>(type: "decimal(20,0)", nullable: true),
-                    LeavingPlayerId = table.Column<decimal>(type: "decimal(20,0)", nullable: true),
-                    ReplacingPlayerId = table.Column<decimal>(type: "decimal(20,0)", nullable: true),
+                    FaultyPlayerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LeavingPlayerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ReplacingPlayerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Score = table.Column<int>(type: "int", nullable: true),
-                    ScorerId = table.Column<decimal>(type: "decimal(20,0)", nullable: true),
-                    InvokerID = table.Column<decimal>(type: "decimal(20,0)", nullable: true)
+                    ScorerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    InvokerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -130,8 +124,7 @@ namespace BasketBall_LiveScore.Migrations
                         name: "FK_MatchEvents_Matchs_MatchId",
                         column: x => x.MatchId,
                         principalTable: "Matchs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MatchEvents_Players_FaultyPlayerId",
                         column: x => x.FaultyPlayerId,
@@ -153,8 +146,8 @@ namespace BasketBall_LiveScore.Migrations
                         principalTable: "Players",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_MatchEvents_Teams_InvokerID",
-                        column: x => x.InvokerID,
+                        name: "FK_MatchEvents_Teams_InvokerId",
+                        column: x => x.InvokerId,
                         principalTable: "Teams",
                         principalColumn: "Id");
                 });
@@ -163,8 +156,8 @@ namespace BasketBall_LiveScore.Migrations
                 name: "MatchPlayer",
                 columns: table => new
                 {
-                    HostsStartingPlayersId = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
-                    MatchId = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
+                    HostsStartingPlayersId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MatchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -187,8 +180,8 @@ namespace BasketBall_LiveScore.Migrations
                 name: "MatchPlayer1",
                 columns: table => new
                 {
-                    Match1Id = table.Column<decimal>(type: "decimal(20,0)", nullable: false),
-                    VisitorsStartingPlayersId = table.Column<decimal>(type: "decimal(20,0)", nullable: false)
+                    Match1Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VisitorsStartingPlayersId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -213,9 +206,9 @@ namespace BasketBall_LiveScore.Migrations
                 column: "FaultyPlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MatchEvents_InvokerID",
+                name: "IX_MatchEvents_InvokerId",
                 table: "MatchEvents",
-                column: "InvokerID");
+                column: "InvokerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MatchEvents_LeavingPlayerId",

@@ -3,7 +3,7 @@
 namespace BasketBall_LiveScore.Models;
 public class Player
 {
-    public ulong Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     [MaxLength(70)]
     [Required]
     public string FirstName { get; set; } = string.Empty;
@@ -11,7 +11,7 @@ public class Player
     [Required]
     public string LastName { get; set; } = string.Empty;
     [Required]
-    public ulong TeamId { get; set; }
+    public Guid TeamId { get; set; }
     [Required]
     public byte Number { get; set; } = byte.MinValue;
     [Required]

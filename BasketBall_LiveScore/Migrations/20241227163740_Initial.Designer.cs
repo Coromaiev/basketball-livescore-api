@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BasketBall_LiveScore.Migrations
 {
     [DbContext(typeof(LiveScoreContext))]
-    [Migration("20241226183816_RemoveUselessConstraints")]
-    partial class RemoveUselessConstraints
+    [Migration("20241227163740_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,14 +27,13 @@ namespace BasketBall_LiveScore.Migrations
 
             modelBuilder.Entity("BasketBall_LiveScore.Models.Match", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
-
-                    b.Property<decimal>("HostsId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid?>("HostsId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("HostsScore")
                         .HasColumnType("decimal(20,0)");
@@ -42,11 +41,13 @@ namespace BasketBall_LiveScore.Migrations
                     b.Property<byte>("NumberOfQuarters")
                         .HasColumnType("tinyint");
 
-                    b.Property<decimal>("PlayEncoderId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid?>("PlayEncoderId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("PrepEncoderId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid?>("PrepEncoderId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<byte>("QuarterDuration")
                         .HasColumnType("tinyint");
@@ -54,8 +55,9 @@ namespace BasketBall_LiveScore.Migrations
                     b.Property<byte>("TimeOutDuration")
                         .HasColumnType("tinyint");
 
-                    b.Property<decimal>("VisitorsId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid?>("VisitorsId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("VisitorsScore")
                         .HasColumnType("decimal(20,0)");
@@ -75,19 +77,18 @@ namespace BasketBall_LiveScore.Migrations
 
             modelBuilder.Entity("BasketBall_LiveScore.Models.MatchEvent", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
                         .HasMaxLength(13)
                         .HasColumnType("nvarchar(13)");
 
-                    b.Property<decimal>("MatchId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid?>("MatchId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<byte>("QuarterNumber")
                         .HasColumnType("tinyint");
@@ -108,11 +109,9 @@ namespace BasketBall_LiveScore.Migrations
 
             modelBuilder.Entity("BasketBall_LiveScore.Models.Player", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -127,8 +126,8 @@ namespace BasketBall_LiveScore.Migrations
                     b.Property<byte>("Number")
                         .HasColumnType("tinyint");
 
-                    b.Property<decimal>("TeamId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -139,11 +138,9 @@ namespace BasketBall_LiveScore.Migrations
 
             modelBuilder.Entity("BasketBall_LiveScore.Models.Team", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -157,11 +154,9 @@ namespace BasketBall_LiveScore.Migrations
 
             modelBuilder.Entity("BasketBall_LiveScore.Models.User", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(20,0)");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -188,11 +183,11 @@ namespace BasketBall_LiveScore.Migrations
 
             modelBuilder.Entity("MatchPlayer", b =>
                 {
-                    b.Property<decimal>("HostsStartingPlayersId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid>("HostsStartingPlayersId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("MatchId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid>("MatchId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("HostsStartingPlayersId", "MatchId");
 
@@ -203,11 +198,11 @@ namespace BasketBall_LiveScore.Migrations
 
             modelBuilder.Entity("MatchPlayer1", b =>
                 {
-                    b.Property<decimal>("Match1Id")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid>("Match1Id")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("VisitorsStartingPlayersId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid>("VisitorsStartingPlayersId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Match1Id", "VisitorsStartingPlayersId");
 
@@ -220,8 +215,8 @@ namespace BasketBall_LiveScore.Migrations
                 {
                     b.HasBaseType("BasketBall_LiveScore.Models.MatchEvent");
 
-                    b.Property<decimal>("FaultyPlayerId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid>("FaultyPlayerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -235,11 +230,11 @@ namespace BasketBall_LiveScore.Migrations
                 {
                     b.HasBaseType("BasketBall_LiveScore.Models.MatchEvent");
 
-                    b.Property<decimal>("LeavingPlayerId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid>("LeavingPlayerId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("ReplacingPlayerId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid>("ReplacingPlayerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasIndex("LeavingPlayerId");
 
@@ -255,8 +250,8 @@ namespace BasketBall_LiveScore.Migrations
                     b.Property<int>("Score")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("ScorerId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid>("ScorerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasIndex("ScorerId");
 
@@ -267,8 +262,8 @@ namespace BasketBall_LiveScore.Migrations
                 {
                     b.HasBaseType("BasketBall_LiveScore.Models.MatchEvent");
 
-                    b.Property<decimal>("InvokerId")
-                        .HasColumnType("decimal(20,0)");
+                    b.Property<Guid>("InvokerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasIndex("InvokerId");
 
