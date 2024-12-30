@@ -30,10 +30,10 @@ namespace BasketBall_LiveScore.Services.Impl
                     match.QuarterDuration,
                     match.NumberOfQuarters,
                     match.TimeOutDuration,
-                    (Guid)match.VisitorsId,
-                    (Guid)match.HostsId,
+                    match.VisitorsId,
+                    match.HostsId,
                     (Guid)match.PrepEncoderId,
-                    (Guid)match.PlayEncoderId,
+                    match.PlayEncoders.Select(encoder => encoder.Id).ToList(),
                     match.HostsScore,
                     (ulong)match.VisitorsScore
                 );
