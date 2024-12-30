@@ -10,11 +10,12 @@ public class Player
     [MaxLength(100)]
     [Required]
     public string LastName { get; set; } = string.Empty;
-    [Required]
-    public Guid TeamId { get; set; }
-    [Required]
-    public byte Number { get; set; } = byte.MinValue;
-    [Required]
+    public Guid? TeamId { get; set; }
+    public byte? Number { get; set; }
     public Team? Team { get; set; } = null;
 
 }
+
+public record PlayerDto(Guid Id, string FirstName, string LastName, Guid? TeamId, byte? Number);
+public record PlayerCreateDto(string FirstName, string LastName, Guid? TeamId, byte? Number);
+public record PlayerUpdateDto(string? FirstName, string? LastName, Guid? TeamId, byte? Number);

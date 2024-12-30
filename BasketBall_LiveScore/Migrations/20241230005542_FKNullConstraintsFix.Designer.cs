@@ -4,6 +4,7 @@ using BasketBall_LiveScore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BasketBall_LiveScore.Migrations
 {
     [DbContext(typeof(LiveScoreContext))]
-    partial class LiveScoreContextModelSnapshot : ModelSnapshot
+    [Migration("20241230005542_FKNullConstraintsFix")]
+    partial class FKNullConstraintsFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,7 +31,8 @@ namespace BasketBall_LiveScore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("HostsId")
+                    b.Property<Guid?>("HostsId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("HostsScore")
@@ -38,9 +42,11 @@ namespace BasketBall_LiveScore.Migrations
                         .HasColumnType("tinyint");
 
                     b.Property<Guid?>("PlayEncoderId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("PrepEncoderId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<byte>("QuarterDuration")
@@ -49,7 +55,8 @@ namespace BasketBall_LiveScore.Migrations
                     b.Property<byte>("TimeOutDuration")
                         .HasColumnType("tinyint");
 
-                    b.Property<Guid>("VisitorsId")
+                    b.Property<Guid?>("VisitorsId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("VisitorsScore")
@@ -79,7 +86,8 @@ namespace BasketBall_LiveScore.Migrations
                         .HasMaxLength(13)
                         .HasColumnType("nvarchar(13)");
 
-                    b.Property<Guid>("MatchId")
+                    b.Property<Guid?>("MatchId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<byte>("QuarterNumber")
@@ -116,9 +124,11 @@ namespace BasketBall_LiveScore.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<byte?>("Number")
+                        .IsRequired()
                         .HasColumnType("tinyint");
 
                     b.Property<Guid?>("TeamId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -273,12 +283,14 @@ namespace BasketBall_LiveScore.Migrations
                     b.HasOne("BasketBall_LiveScore.Models.User", "PlayEncoder")
                         .WithMany()
                         .HasForeignKey("PlayEncoderId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("BasketBall_LiveScore.Models.User", "PrepEncoder")
                         .WithMany()
                         .HasForeignKey("PrepEncoderId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("BasketBall_LiveScore.Models.Team", "Visitors")
                         .WithMany()
@@ -311,7 +323,8 @@ namespace BasketBall_LiveScore.Migrations
                     b.HasOne("BasketBall_LiveScore.Models.Team", "Team")
                         .WithMany("Players")
                         .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Team");
                 });

@@ -4,6 +4,7 @@ using BasketBall_LiveScore.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BasketBall_LiveScore.Migrations
 {
     [DbContext(typeof(LiveScoreContext))]
-    partial class LiveScoreContextModelSnapshot : ModelSnapshot
+    [Migration("20241230010700_UpdateGlobalNullableFields")]
+    partial class UpdateGlobalNullableFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -116,9 +119,11 @@ namespace BasketBall_LiveScore.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<byte?>("Number")
+                        .IsRequired()
                         .HasColumnType("tinyint");
 
                     b.Property<Guid?>("TeamId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -311,7 +316,8 @@ namespace BasketBall_LiveScore.Migrations
                     b.HasOne("BasketBall_LiveScore.Models.Team", "Team")
                         .WithMany("Players")
                         .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Team");
                 });
