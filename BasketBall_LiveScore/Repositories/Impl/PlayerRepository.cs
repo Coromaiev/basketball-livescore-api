@@ -52,17 +52,25 @@ namespace BasketBall_LiveScore.Repositories.Impl
             return player;
         }
 
-        public async Task<Player?> Update(Player player, byte? newNumber, Team? newTeam, string? newFirstName, string? newLastName)
+        public async Task<Player> Update(Player player, byte? newNumber, Team? newTeam, string? newFirstName, string? newLastName)
         {
-            Console.WriteLine($"{newTeam.Id}");
             if (newNumber.HasValue) player.Number = newNumber.Value;
-            if (newTeam is not null)
+            if (newTeam != null)
             {
                 player.Team = newTeam;
                 player.TeamId = newTeam.Id;
             }
             if (!string.IsNullOrWhiteSpace(newFirstName)) player.FirstName = newFirstName;
             if (!string.IsNullOrWhiteSpace(newLastName)) player.LastName = newLastName;
+            await Context.SaveChangesAsync();
+            return player;
+        }
+
+        public async Task<Player> RemoveTeam(Player player)
+        {
+            player.Team = null;
+            player.TeamId = null;
+            player.Number = null;
             await Context.SaveChangesAsync();
             return player;
         }

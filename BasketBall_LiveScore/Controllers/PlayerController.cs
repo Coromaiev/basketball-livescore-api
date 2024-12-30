@@ -105,6 +105,26 @@ namespace BasketBall_LiveScore.Controllers
             }
         }
 
+        [Route("{id:guid}/leave")]
+        [HttpPut]
+        public async Task<IActionResult> LeavePlayerTeam([FromRoute] Guid id)
+        {
+            try
+            {
+                var updatedPlayer = await PlayerService.UpdateQuitTeam(id);
+                return NoContent();
+            }
+            catch (ApiException ex)
+            {
+                return StatusCode((int)ex.StatusCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Exception while performing player update");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "An unexpected error occurred");
+            }
+        }
+
         [Route("{id:guid}")]
         [HttpDelete]
         public async Task<IActionResult> Delete([FromRoute] Guid id)

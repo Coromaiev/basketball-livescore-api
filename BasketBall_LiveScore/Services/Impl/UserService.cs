@@ -74,13 +74,10 @@ namespace BasketBall_LiveScore.Services.Impl
         {
             if (updateDto is null) throw new BadRequestException("No update parameters provided");
             var user = await UserRepository.GetById(id) ?? throw new NotFoundException($"User with id {id} not found");
-            Console.WriteLine($"update dto is {updateDto.NewEmail}, {updateDto.NewPassword}, {updateDto.CurrentPassword}");
-            Console.WriteLine($"user is {user.Email}, {user.Password}");
             if (
                 (!string.IsNullOrEmpty(updateDto.NewPassword) || !string.IsNullOrEmpty(updateDto.NewEmail)) 
                 && (string.IsNullOrEmpty(updateDto.CurrentPassword) || !updateDto.CurrentPassword.Equals(user.Password))
                ) throw new UnauthorizedException("Invalid Credentials for the requested update");
-            Console.WriteLine("Reached this ?");
             var updatedUser = await UserRepository.Update(user, updateDto.NewEmail, updateDto.NewPassword, updateDto.NewUsername, updateDto.NewPermission);
             return ConvertToDto(updatedUser);
         }

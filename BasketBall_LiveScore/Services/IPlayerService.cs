@@ -9,6 +9,7 @@ namespace BasketBall_LiveScore.Services
         public Task<PlayerDto?> GetById(Guid id);
         public Task<PlayerDto?> Create(PlayerCreateDto player);
         public Task<PlayerDto?> Update(Guid id, PlayerUpdateDto updatedPlayer);
+        public Task<PlayerDto?> UpdateQuitTeam(Guid id);
         public Task Delete(Guid id);
     }
 }

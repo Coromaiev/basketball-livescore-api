@@ -59,7 +59,6 @@ namespace BasketBall_LiveScore.Repositories.Impl
 
         public async Task<User> Update(User user, string? newEmail, string? newPassword, string? newUsername, Role? newPermission)
         {
-            Console.WriteLine($"{newPassword}, {newEmail}");
             if (!string.IsNullOrEmpty(newPassword)) user.Password = newPassword;
             if (!string.IsNullOrEmpty(newEmail)) user.Email = newEmail;
             if (!string.IsNullOrEmpty(newUsername)) user.Username = newUsername;

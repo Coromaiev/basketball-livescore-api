@@ -1,6 +1,7 @@
 ﻿using BasketBall_LiveScore.Exceptions;
 using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Repositories;
+using System.Data.SqlTypes;
 
 namespace BasketBall_LiveScore.Services.Impl
 {
@@ -73,6 +74,8 @@ namespace BasketBall_LiveScore.Services.Impl
         public async Task<PlayerDto?> Update(Guid id, PlayerUpdateDto updatedPlayer)
         {
             var playerToUpdate = await PlayerRepository.GetById(id) ?? throw new NotFoundException($"Player {id} not found");
+
+            // Trying to perform a player team transfer
             if (updatedPlayer.TeamId.HasValue && updatedPlayer.Number.HasValue)
             {
                 var newTeam = await TeamRepository.GetById(updatedPlayer.TeamId.Value) ?? throw new NotFoundException($"Could not find team {updatedPlayer.TeamId.Value}");
@@ -83,7 +86,13 @@ namespace BasketBall_LiveScore.Services.Impl
                     await TeamRepository.RemovePlayer(playerToUpdate.Team, playerToUpdate);
                 }
                 await TeamRepository.AddPlayer(newTeam, playerToUpdate);
-            } else if (updatedPlayer.TeamId.HasValue) throw new BadRequestException("A number value is required when assigning a player to a new team");
+            } // Else : trying to update the player number inside their team
+            else if (updatedPlayer.Number.HasValue && playerToUpdate.Team is not null && !IsNumberValidForTeam(playerToUpdate.Team, updatedPlayer.Number.Value))
+            {
+                throw new BadRequestException($"Number {updatedPlayer.Number.Value} is already assigned in team {playerToUpdate.Team.Id}");
+            } // Else : trying to perform a player team transfer without providing a number into that new team
+            else if ((updatedPlayer.TeamId.HasValue && !updatedPlayer.Number.HasValue) || (updatedPlayer.Number.HasValue && playerToUpdate.Team is null))
+                throw new BadRequestException("A number value is required when assigning a player to a new team. A number cannot be assigned to a player without a team");
 
             var player = await PlayerRepository.Update
                 (
@@ -93,7 +102,16 @@ namespace BasketBall_LiveScore.Services.Impl
                     updatedPlayer.FirstName,
                     updatedPlayer.LastName
                 );
-            return player is not null ? ConvertToDto(player) : null;
+            return ConvertToDto(player);
+        }
+
+        public async Task<PlayerDto?> UpdateQuitTeam(Guid id)
+        {
+            var playerToUpdate = await PlayerRepository.GetById(id) ?? throw new NotFoundException($"Player with id {id} not found");
+            if (playerToUpdate.Team is null) throw new ConflictException($"Cannot remove player {id} from their team. No team assigned");
+            await TeamRepository.RemovePlayer(playerToUpdate.Team, playerToUpdate);
+            playerToUpdate = await PlayerRepository.RemoveTeam(playerToUpdate);
+            return ConvertToDto(playerToUpdate);
         }
 
         private static PlayerDto ConvertToDto(Player player)
