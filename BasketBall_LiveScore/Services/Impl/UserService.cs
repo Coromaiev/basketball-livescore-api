@@ -1,4 +1,5 @@
 ﻿using BasketBall_LiveScore.Exceptions;
+using BasketBall_LiveScore.Mappers;
 using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Repositories;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -8,13 +9,15 @@ namespace BasketBall_LiveScore.Services.Impl
     public class UserService : IUserService
     {
         private readonly IUserRepository UserRepository;
+        private readonly IUserMapper UserMapper;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, IUserMapper userMapper)
         {
-            this.UserRepository = userRepository;
+            UserRepository = userRepository;
+            UserMapper = userMapper;
         }
 
-        public async Task<UserDto?> Create(UserCreateDto createDto)
+        public async Task<UserDto> Create(UserCreateDto createDto)
         {
             if (createDto is null) throw new BadRequestException("No creation data provided");
             if (string.IsNullOrWhiteSpace(createDto.Email) || string.IsNullOrWhiteSpace(createDto.Password) || string.IsNullOrWhiteSpace(createDto.Username))
@@ -22,9 +25,9 @@ namespace BasketBall_LiveScore.Services.Impl
             var existingUser = await UserRepository.GetByEmail(createDto.Email);
             if (existingUser is null)
             {
-                var newUser = ConvertToEntity(createDto);
+                var newUser = UserMapper.ConvertToEntity(createDto);
                 await UserRepository.Create(newUser);
-                return ConvertToDto(newUser);
+                return UserMapper.ConvertToDto(newUser);
             }
             throw new ConflictException($"An account already exists for email {createDto.Email}");
         }
@@ -39,7 +42,7 @@ namespace BasketBall_LiveScore.Services.Impl
 
             await foreach (var user in users)
             {
-                yield return ConvertToDto(user);
+                yield return UserMapper.ConvertToDto(user);
             }
         }
 
@@ -47,16 +50,16 @@ namespace BasketBall_LiveScore.Services.Impl
         {
             if (loginDto is null) throw new BadRequestException("No data provided");
             var user = await UserRepository.GetByEmailAndPassword(loginDto.Email, loginDto.Password) ?? throw new UnauthorizedException("Credentials provided are invalid");
-            return ConvertToDto(user);
+            return UserMapper.ConvertToDto(user);
         }
 
         public async Task<UserDto> GetById(Guid id)
         {
             var user = await UserRepository.GetById(id) ?? throw new NotFoundException($"User with id {id} not found");
-            return ConvertToDto(user);
+            return UserMapper.ConvertToDto(user);
         }
 
-        public async IAsyncEnumerable<UserDto?> GetByRole(Role role)
+        public async IAsyncEnumerable<UserDto> GetByRole(Role role)
         {
             var users = UserRepository.GetByRole(role);
             if (users is null)
@@ -66,11 +69,11 @@ namespace BasketBall_LiveScore.Services.Impl
             
             await foreach(var user in users)
             {
-                yield return ConvertToDto(user);
+                yield return UserMapper.ConvertToDto(user);
             }
         }
 
-        public async Task<UserDto?> Update(Guid id, UserUpdateDto updateDto)
+        public async Task<UserDto> Update(Guid id, UserUpdateDto updateDto)
         {
             if (updateDto is null) throw new BadRequestException("No update parameters provided");
             var user = await UserRepository.GetById(id) ?? throw new NotFoundException($"User with id {id} not found");
@@ -79,31 +82,13 @@ namespace BasketBall_LiveScore.Services.Impl
                 && (string.IsNullOrEmpty(updateDto.CurrentPassword) || !updateDto.CurrentPassword.Equals(user.Password))
                ) throw new UnauthorizedException("Invalid Credentials for the requested update");
             var updatedUser = await UserRepository.Update(user, updateDto.NewEmail, updateDto.NewPassword, updateDto.NewUsername, updateDto.NewPermission);
-            return ConvertToDto(updatedUser);
+            return UserMapper.ConvertToDto(updatedUser);
         }
 
         public async Task Delete(Guid id)
         {
             var userToDelete = await UserRepository.GetById(id) ?? throw new ConflictException($"User {id} does not exist or has already been deleted");
             await UserRepository.Delete(userToDelete);
-        }
-
-        private static User ConvertToEntity(UserCreateDto userDto)
-        {
-            var newUser = new User
-            {
-                Email = userDto.Email,
-                Password = userDto.Password,
-                Username = userDto.Username,
-                Permission = userDto.Permission,
-            };
-            return newUser;
-        }
-
-        private static UserDto ConvertToDto(User user)
-        {
-            var userDto = new UserDto(user.Id, user.Username, user.Email, user.Permission);
-            return userDto;
         }
     }
 }

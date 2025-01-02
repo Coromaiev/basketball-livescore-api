@@ -1,5 +1,7 @@
 using BasketBall_LiveScore.Handlers;
 using BasketBall_LiveScore.Infrastructure;
+using BasketBall_LiveScore.Mappers;
+using BasketBall_LiveScore.Mappers.Impl;
 using BasketBall_LiveScore.Repositories;
 using BasketBall_LiveScore.Repositories.Impl;
 using BasketBall_LiveScore.Requirements;
@@ -18,15 +20,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<LiveScoreContext>(
     options => options
     .UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]));
+
+// Repositories injection
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+// Services injection
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+// Mappers injection
+builder.Services.AddSingleton<IMatchMapper, MatchMapper>();
+builder.Services.AddSingleton<IPlayerMapper, PlayerMapper>();
+builder.Services.AddSingleton<ITeamMapper, TeamMapper>();
+builder.Services.AddSingleton<IUserMapper, UserMapper>();
 
 builder.Services.AddScoped<IAuthorizationHandler, MatchAssignmentHandler>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

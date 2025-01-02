@@ -44,7 +44,7 @@ namespace BasketBall_LiveScore.Handlers
             }
 
             var match = MatchService.GetById(matchId).Result;
-            bool isPrepEncoder = match.PrepEncoderId.Equals(userId);
+            bool isPrepEncoder = match.PrepEncoder is not null && match.PrepEncoder.Id.Equals(userId);
             bool isPlayEncoder = match.PlayEncoders.Any(encoderId => encoderId.Equals(userId));
 
             if ((action.Equals("prepare") && isPrepEncoder) || (action.Equals("play") && isPlayEncoder))

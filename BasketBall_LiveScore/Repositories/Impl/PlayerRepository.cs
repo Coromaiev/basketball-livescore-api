@@ -21,7 +21,7 @@ namespace BasketBall_LiveScore.Repositories.Impl
             return foundPlayer;
         }
 
-        public async IAsyncEnumerable<Player?> GetAll()
+        public async IAsyncEnumerable<Player> GetAll()
         {
             var players = Context.Players
                 .Include(player => player.Team)
@@ -33,7 +33,7 @@ namespace BasketBall_LiveScore.Repositories.Impl
 
         }
 
-        public async IAsyncEnumerable<Player?> GetByTeam(Guid teamId)
+        public async IAsyncEnumerable<Player> GetByTeam(Guid teamId)
         {
             var teamPlayers = Context.Players
                 .Where(player => player.TeamId.Equals(teamId))

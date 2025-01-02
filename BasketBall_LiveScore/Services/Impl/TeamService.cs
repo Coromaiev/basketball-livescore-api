@@ -1,4 +1,5 @@
 ﻿using BasketBall_LiveScore.Exceptions;
+using BasketBall_LiveScore.Mappers;
 using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Repositories;
 using System.Diagnostics;
@@ -8,18 +9,20 @@ namespace BasketBall_LiveScore.Services.Impl
     public class TeamService : ITeamService
     {
         private readonly ITeamRepository TeamRepository;
+        private readonly ITeamMapper TeamMapper;
 
-        public TeamService(ITeamRepository teamRepository)
+        public TeamService(ITeamRepository teamRepository, ITeamMapper teamMapper)
         {
             TeamRepository = teamRepository;
+            TeamMapper = teamMapper;
         }
 
-        public async Task<TeamDto?> Create(string name)
+        public async Task<TeamDto> Create(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new BadRequestException("Provided team name is invalid");
-            var team = ConvertToEntity(name);
+            var team = TeamMapper.ConvertToEntity(name);
             await TeamRepository.Create(team);
-            return ConvertToDto(team);
+            return TeamMapper.ConvertToDto(team);
         }
 
         public async Task Delete(Guid id)
@@ -28,51 +31,24 @@ namespace BasketBall_LiveScore.Services.Impl
             await TeamRepository.Delete(team);
         }
 
-        public async IAsyncEnumerable<TeamDto?> GetAll()
+        public async IAsyncEnumerable<TeamDto> GetAll()
         {
             var teams = TeamRepository.GetAll() ?? throw new NotFoundException("No teams currently available");
-            await foreach (var team in teams) yield return ConvertToDto(team);
+            await foreach (var team in teams) yield return TeamMapper.ConvertToDto(team);
         }
 
-        public async Task<TeamDto?> GetById(Guid id)
+        public async Task<TeamDto> GetById(Guid id)
         {
             var team = await TeamRepository.GetById(id) ?? throw new NotFoundException($"Could not find team with id {id}");
-            return ConvertToDto(team);
+            return TeamMapper.ConvertToDto(team);
         }
 
-        public async Task<TeamDto?> Update(Guid id, string newName)
+        public async Task<TeamDto> Update(Guid id, string newName)
         {
             if (string.IsNullOrEmpty(newName)) throw new BadRequestException("Provided new name is invalid");
             var team = await TeamRepository.GetById(id) ?? throw new NotFoundException($"Could not find team with id {id}");
             team = await TeamRepository.Update(team, newName);
-            return ConvertToDto(team);
-        }
-
-        private static Team ConvertToEntity(string name)
-        {
-            var team = new Team
-            {
-                Name = name,
-            };
-            return team;
-        }
-
-        private static TeamDto ConvertToDto(Team team)
-        {
-            var teamDto = new TeamDto
-                (
-                    team.Id,
-                    team.Name,
-                    team.Players.Select(player => new PlayerDto
-                    (
-                        player.Id,
-                        player.FirstName,
-                        player.LastName,
-                        team.Id,
-                        player.Number
-                    )).ToList()
-                );
-            return teamDto;
+            return TeamMapper.ConvertToDto(team);
         }
     }
 }

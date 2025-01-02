@@ -3,14 +3,20 @@
 namespace BasketBall_LiveScore.Models;
 public class Match
 {
+    public const int MaxPlayersPerTeam = 5;
+    public const int MinScore = 0;
+    public const byte StandardQuarterDuration = 10;
+    public const byte StandardNumberOfQuarters = 4;
+    public const byte StandardTimeOutDurationMins = 1;
+
     [Required]
     public Guid Id { get; set; } = Guid.NewGuid();
     [Required]
-    public byte QuarterDuration { get; set; }
+    public byte QuarterDuration { get; set; } = StandardQuarterDuration;
     [Required]
-    public byte NumberOfQuarters { get; set; }
+    public byte NumberOfQuarters { get; set; } = StandardNumberOfQuarters;
     [Required]
-    public byte TimeOutDuration { get; set; }
+    public byte TimeOutDuration { get; set; } = StandardTimeOutDurationMins;
     [Required]
     public Team Visitors { get; set; }
     [Required]
@@ -30,18 +36,22 @@ public class Match
     [Required]
     public bool IsFinished { get; set; } = false;
     [Required]
-    public ulong HostsScore { get; set; } = 0;
+    public ulong HostsScore { get; set; } = MinScore;
     [Required]
-    public ulong VisitorsScore { get; set; } = 0;
+    public ulong VisitorsScore { get; set; } = MinScore;
     [Required]
     public List<MatchEvent> Events { get; set; } = [];
     [Required]
-    [MaxLength(5)]
-    public List<Player> VisitorsStartingPlayers = new(5); 
+    [MaxLength(MaxPlayersPerTeam)]
+    public List<Player> VisitorsStartingPlayers = new(MaxPlayersPerTeam); 
     [Required]
-    [MaxLength(5)]
-    public List<Player> HostsStartingPlayers = new(5);
+    [MaxLength(MaxPlayersPerTeam)]
+    public List<Player> HostsStartingPlayers = new(MaxPlayersPerTeam);
 }
 
-// MISSES EVENTS AND STARTING PLAYERS. TEAMS SHOULD HAVE THEIR IDS REPLACED WITH DTOS
-public record MatchDto(Guid Id, byte QuarterDuration, byte QuarterNumbers, byte TimeoutDuration, Guid VisitorsId, Guid HostsId, Guid PrepEncoderId, List<Guid> PlayEncoders, ulong HostsScore, ulong VisitorsScore);
+// MISSES EVENTS
+public record MatchDto(Guid Id, byte QuarterDuration, byte QuarterNumber, byte TimeoutDuration, TeamDto Visitors, TeamDto Hosts, List<Guid> FieldPlayers, UserDto? PrepEncoder, List<UserDto> PlayEncoders, ulong HostsScore, ulong VisitorsScore /*, List<MatchEventDto> Events*/);
+public record MatchCreateDto(byte? QuarterDuration, byte? QuarterNumber, byte? TimeoutDuration, Guid VisitorsId, Guid HostsId, Guid? PrepEncoderId);
+public record MatchUpdatePrepDto(byte? QuarterDuration, byte? QuarterNumber, byte? TimeoutDuration, Guid? VisitorsId, Guid? HostsId, Guid? PrepEncoderId, bool? HasStarted);
+public record MatchUpdatePlayDto(ulong? VisitorsScore, ulong? HostsScore, bool? IsFinished, Guid? WinnerId);
+public record MatchUpdateListDto(IEnumerable<Guid> IncomingEntities, IEnumerable<Guid> LeavingEntities);

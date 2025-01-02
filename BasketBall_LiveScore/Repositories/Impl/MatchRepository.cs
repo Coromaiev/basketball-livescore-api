@@ -20,23 +20,23 @@ namespace BasketBall_LiveScore.Repositories.Impl
             return match;
         }
 
-        public async Task<Match> AddHostStartingPlayer(Match match, Player player)
+        public async Task<Match> AddHostStartingPlayers(Match match, IEnumerable<Player> players)
         {
-            match.HostsStartingPlayers.Add(player);
+            match.HostsStartingPlayers.AddRange(players);
             await Context.SaveChangesAsync();
             return match;
         }
 
-        public async Task<Match> AddPlayEncoder(Match match, User playEncoder)
+        public async Task<Match> AddPlayEncoders(Match match, IEnumerable<User> playEncoders)
         {
-            match.PlayEncoders.Add(playEncoder);
+            match.PlayEncoders.AddRange(playEncoders);
             await Context.SaveChangesAsync();
             return match;
         }
 
-        public async Task<Match> AddVisitorStartingPlayer(Match match, Player player)
+        public async Task<Match> AddVisitorStartingPlayers(Match match, IEnumerable<Player> players)
         {
-            match.VisitorsStartingPlayers.Add(player);
+            match.VisitorsStartingPlayers.AddRange(players);
             await Context.SaveChangesAsync();
             return match;
         }
@@ -48,9 +48,22 @@ namespace BasketBall_LiveScore.Repositories.Impl
             return match;
         }
 
+        public async Task Delete(Match match)
+        {
+            Context.Matchs.Remove(match);
+            await Context.SaveChangesAsync();
+        }
+
         public async IAsyncEnumerable<Match> GetAll()
         {
-            var matchs = Context.Matchs;
+            var matchs = Context.Matchs
+                .Include(match => match.Visitors)
+                    .ThenInclude(team => team.Players)
+                .Include(match => match.Hosts)
+                    .ThenInclude(team => team.Players)
+                .Include(match => match.PrepEncoder)
+                .Include(match => match.PlayEncoders)
+                .AsAsyncEnumerable();
             await foreach (var match in matchs)
             {
                 yield return match;
@@ -62,19 +75,40 @@ namespace BasketBall_LiveScore.Repositories.Impl
             var encoderMatchs = Context.Matchs
                 .Where(match => match.PlayEncoders.Any(playEncoder => playEncoder.Id.Equals(encoder.Id))
                                 || (match.PrepEncoder != null && match.PrepEncoder.Id.Equals(encoder.Id)))
+                .Include(match => match.Visitors)
+                    .ThenInclude(team => team.Players)
+                .Include(match => match.Hosts)
+                    .ThenInclude(team => team.Players)
+                .Include(match => match.PrepEncoder)
+                .Include(match => match.PlayEncoders)
                 .AsAsyncEnumerable();
             await foreach (var encoderMatch in encoderMatchs) { yield return encoderMatch; }
         }
 
         public async Task<Match?> GetById(Guid id)
         {
-            var match = await Context.Matchs.FirstOrDefaultAsync(m => m.Id.Equals(id));
+            var match = await Context.Matchs
+                .Include(match => match.Visitors)
+                    .ThenInclude(team => team.Players)
+                .Include(match => match.Hosts)
+                    .ThenInclude(team => team.Players)
+                .Include(match => match.PrepEncoder)
+                .Include(match => match.PlayEncoders)
+                .FirstOrDefaultAsync(m => m.Id.Equals(id));
             return match;
         }
 
         public async IAsyncEnumerable<Match> GetByTeam(Team team)
         {
-            var teamMatchs = Context.Matchs.Where(match => match.Hosts.Id.Equals(team.Id) || match.Visitors.Id.Equals(team.Id)).AsAsyncEnumerable();
+            var teamMatchs = Context.Matchs
+                .Where(match => match.Hosts.Id.Equals(team.Id) || match.Visitors.Id.Equals(team.Id))
+                .Include(match => match.Visitors)
+                    .ThenInclude(team => team.Players)
+                .Include(match => match.Hosts)
+                    .ThenInclude(team => team.Players)
+                .Include(match => match.PrepEncoder)
+                .Include(match => match.PlayEncoders)
+                .AsAsyncEnumerable();
             await foreach (var match in teamMatchs)
             {
                 yield return match;
@@ -83,7 +117,15 @@ namespace BasketBall_LiveScore.Repositories.Impl
 
         public async IAsyncEnumerable<Match> GetFinished(bool isFinished)
         {
-            var matchs = Context.Matchs.Where(match => match.IsFinished == isFinished).AsAsyncEnumerable();
+            var matchs = Context.Matchs
+                .Where(match => match.IsFinished == isFinished)
+                .Include(match => match.Visitors)
+                    .ThenInclude(team => team.Players)
+                .Include(match => match.Hosts)
+                    .ThenInclude(team => team.Players)
+                .Include(match => match.PrepEncoder)
+                .Include(match => match.PlayEncoders)
+                .AsAsyncEnumerable();
             await foreach (var match in matchs) { yield return match; }
         }
 
@@ -94,23 +136,23 @@ namespace BasketBall_LiveScore.Repositories.Impl
             return match;
         }
 
-        public async Task<Match> RemoveHostStartingPlayer(Match match, Player player)
+        public async Task<Match> RemoveHostStartingPlayers(Match match, IEnumerable<Player> players)
         {
-            match.HostsStartingPlayers.Remove(player);
+            match.HostsStartingPlayers.RemoveAll(player => players.Contains(player));
             await Context.SaveChangesAsync();
             return match;
         }
 
-        public async Task<Match> RemovePlayEncoder(Match match, User playEncoder)
+        public async Task<Match> RemovePlayEncoders(Match match, IEnumerable<User> playEncoders)
         {
-            match.PlayEncoders.Remove(playEncoder);
+            match.PlayEncoders.RemoveAll(playEncoder => playEncoders.Contains(playEncoder));
             await Context.SaveChangesAsync();
             return match;
         }
 
-        public async Task<Match> RemoveVisitorStartingPlayer(Match match, Player player)
+        public async Task<Match> RemoveVisitorStartingPlayers(Match match, IEnumerable<Player> players)
         {
-            match.VisitorsStartingPlayers.Remove(player);
+            match.VisitorsStartingPlayers.RemoveAll(player => players.Contains(player));
             await Context.SaveChangesAsync();
             return match;
         }

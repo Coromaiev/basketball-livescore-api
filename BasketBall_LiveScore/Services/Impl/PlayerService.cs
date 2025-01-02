@@ -1,4 +1,5 @@
 ﻿using BasketBall_LiveScore.Exceptions;
+using BasketBall_LiveScore.Mappers;
 using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Repositories;
 using System.Data.SqlTypes;
@@ -9,11 +10,13 @@ namespace BasketBall_LiveScore.Services.Impl
     {
         private readonly IPlayerRepository PlayerRepository;
         private readonly ITeamRepository TeamRepository;
+        private readonly IPlayerMapper PlayerMapper;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository)
+        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IPlayerMapper playerMapper)
         {
             PlayerRepository = playerRepository;
             TeamRepository = teamRepository;
+            PlayerMapper = playerMapper;
         }
 
         public async Task<PlayerDto?> Create(PlayerCreateDto player)
@@ -29,11 +32,11 @@ namespace BasketBall_LiveScore.Services.Impl
             }
             else if (player.TeamId.HasValue) throw new BadRequestException("Number is required when assigning a player to a team");
             
-            var newPlayer = ConvertToEntity(player);
+            var newPlayer = PlayerMapper.ConvertToEntity(player);
             newPlayer.Team = team;
             newPlayer = await PlayerRepository.Create(newPlayer);
             if (team is not null) await TeamRepository.AddPlayer(team, newPlayer);
-            return ConvertToDto(newPlayer);
+            return PlayerMapper.ConvertToDto(newPlayer);
         }
 
         public async Task Delete(Guid id)
@@ -46,28 +49,28 @@ namespace BasketBall_LiveScore.Services.Impl
             await PlayerRepository.Delete(player);
         }
 
-        public async IAsyncEnumerable<PlayerDto?> GetAll()
+        public async IAsyncEnumerable<PlayerDto> GetAll()
         {
             var players = PlayerRepository.GetAll() ?? throw new NotFoundException("No players currently available");
             await foreach (var player in players)
             {
-                yield return ConvertToDto(player);
+                yield return PlayerMapper.ConvertToDto(player);
             }
         }
 
         public async Task<PlayerDto?> GetById(Guid id)
         {
             var player = await PlayerRepository.GetById(id) ?? throw new NotFoundException($"Player with id {id} not found");
-            return ConvertToDto(player);
+            return PlayerMapper.ConvertToDto(player);
         }
 
-        public async IAsyncEnumerable<PlayerDto?> GetByTeam(Guid teamId)
+        public async IAsyncEnumerable<PlayerDto> GetByTeam(Guid teamId)
         {
             var team = await TeamRepository.GetById(teamId) ?? throw new NotFoundException($"Team {teamId} does not exist");
             var teamPlayers = PlayerRepository.GetByTeam(teamId) ?? throw new NotFoundException($"Team {teamId} does not have any player");
             await foreach (var player in teamPlayers)
             {
-                yield return ConvertToDto(player);
+                yield return PlayerMapper.ConvertToDto(player);
             }
         }
 
@@ -102,7 +105,7 @@ namespace BasketBall_LiveScore.Services.Impl
                     updatedPlayer.FirstName,
                     updatedPlayer.LastName
                 );
-            return ConvertToDto(player);
+            return PlayerMapper.ConvertToDto(player);
         }
 
         public async Task<PlayerDto?> UpdateQuitTeam(Guid id)
@@ -111,31 +114,7 @@ namespace BasketBall_LiveScore.Services.Impl
             if (playerToUpdate.Team is null) throw new ConflictException($"Cannot remove player {id} from their team. No team assigned");
             await TeamRepository.RemovePlayer(playerToUpdate.Team, playerToUpdate);
             playerToUpdate = await PlayerRepository.RemoveTeam(playerToUpdate);
-            return ConvertToDto(playerToUpdate);
-        }
-
-        private static PlayerDto ConvertToDto(Player player)
-        {
-            PlayerDto playerDto = new(
-                    player.Id,
-                    player.FirstName,
-                    player.LastName,
-                    player.TeamId,
-                    player.Number
-                );
-            return playerDto;
-        }
-
-        private static Player ConvertToEntity(PlayerCreateDto playerDto)
-        {
-            Player player = new()
-            {
-                FirstName = playerDto.FirstName,
-                LastName = playerDto.LastName,
-                TeamId = playerDto.TeamId,
-                Number = playerDto.Number,
-            };
-            return player;
+            return PlayerMapper.ConvertToDto(playerToUpdate);
         }
 
         private static bool IsNumberValidForTeam(Team team, byte number) => !team.Players.Any(player => player.Number == number);
