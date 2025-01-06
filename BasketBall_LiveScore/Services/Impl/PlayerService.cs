@@ -1,8 +1,11 @@
 ﻿using BasketBall_LiveScore.Exceptions;
+using BasketBall_LiveScore.Hubs;
 using BasketBall_LiveScore.Mappers;
 using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Repositories;
+using Microsoft.AspNetCore.SignalR;
 using System.Data.SqlTypes;
+using System.Numerics;
 
 namespace BasketBall_LiveScore.Services.Impl
 {
@@ -11,12 +14,20 @@ namespace BasketBall_LiveScore.Services.Impl
         private readonly IPlayerRepository PlayerRepository;
         private readonly ITeamRepository TeamRepository;
         private readonly IPlayerMapper PlayerMapper;
+        private readonly IHubContext<PlayerHub> HubContext;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IPlayerMapper playerMapper)
+        public PlayerService
+            (
+                IPlayerRepository playerRepository, 
+                ITeamRepository teamRepository, 
+                IPlayerMapper playerMapper,
+                IHubContext<PlayerHub> hubContext
+            )
         {
             PlayerRepository = playerRepository;
             TeamRepository = teamRepository;
             PlayerMapper = playerMapper;
+            HubContext = hubContext;
         }
 
         public async Task<PlayerDto?> Create(PlayerCreateDto player)
@@ -36,7 +47,9 @@ namespace BasketBall_LiveScore.Services.Impl
             newPlayer.Team = team;
             newPlayer = await PlayerRepository.Create(newPlayer);
             if (team is not null) await TeamRepository.AddPlayer(team, newPlayer);
-            return PlayerMapper.ConvertToDto(newPlayer);
+            var playerDto = PlayerMapper.ConvertToDto(newPlayer);
+            await HubContext.Clients.All.SendAsync("PlayersUpdated", playerDto);
+            return playerDto;
         }
 
         public async Task Delete(Guid id)
@@ -47,6 +60,7 @@ namespace BasketBall_LiveScore.Services.Impl
                 await TeamRepository.RemovePlayer(player.Team, player);
             }
             await PlayerRepository.Delete(player);
+            await HubContext.Clients.All.SendAsync("PlayerRemoved", id);
         }
 
         public async IAsyncEnumerable<PlayerDto> GetAll()
@@ -105,7 +119,9 @@ namespace BasketBall_LiveScore.Services.Impl
                     updatedPlayer.FirstName,
                     updatedPlayer.LastName
                 );
-            return PlayerMapper.ConvertToDto(player);
+            var playerDto = PlayerMapper.ConvertToDto(player);
+            await HubContext.Clients.All.SendAsync("PlayersUpdated", playerDto);
+            return playerDto;
         }
 
         public async Task<PlayerDto?> UpdateQuitTeam(Guid id)
@@ -114,7 +130,9 @@ namespace BasketBall_LiveScore.Services.Impl
             if (playerToUpdate.Team is null) throw new ConflictException($"Cannot remove player {id} from their team. No team assigned");
             await TeamRepository.RemovePlayer(playerToUpdate.Team, playerToUpdate);
             playerToUpdate = await PlayerRepository.RemoveTeam(playerToUpdate);
-            return PlayerMapper.ConvertToDto(playerToUpdate);
+            var playerDto = PlayerMapper.ConvertToDto(playerToUpdate);
+            await HubContext.Clients.All.SendAsync("PlayersUpdated", playerDto);
+            return playerDto;
         }
 
         private static bool IsNumberValidForTeam(Team team, byte number) => !team.Players.Any(player => player.Number == number);

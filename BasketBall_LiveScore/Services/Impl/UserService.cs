@@ -34,12 +34,7 @@ namespace BasketBall_LiveScore.Services.Impl
 
         public async IAsyncEnumerable<UserDto> GetAll()
         {
-            var users = UserRepository.GetAll();
-            if (users is null)
-            {
-                throw new NotFoundException("No users currently available");
-            }
-
+            var users = UserRepository.GetAll() ?? throw new NotFoundException("No users currently available");
             await foreach (var user in users)
             {
                 yield return UserMapper.ConvertToDto(user);
@@ -61,13 +56,8 @@ namespace BasketBall_LiveScore.Services.Impl
 
         public async IAsyncEnumerable<UserDto> GetByRole(Role role)
         {
-            var users = UserRepository.GetByRole(role);
-            if (users is null)
-            {
-                throw new NotFoundException($"No user found for role {role}");
-            }
-            
-            await foreach(var user in users)
+            var users = UserRepository.GetByRole(role) ?? throw new NotFoundException($"No user found for role {role}");
+            await foreach (var user in users)
             {
                 yield return UserMapper.ConvertToDto(user);
             }

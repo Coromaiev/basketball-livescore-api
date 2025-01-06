@@ -25,6 +25,12 @@ namespace BasketBall_LiveScore.Handlers
             }
             var userRole = context.User.FindFirstValue(ClaimTypes.Role);
 
+            if (userRole.Equals("Admin"))
+            {
+                context.Succeed(requirement);
+                return Task.CompletedTask;
+            }
+
             if (!userRole.Equals("Encoder"))
             {
                 context.Fail();

@@ -1,8 +1,10 @@
 ﻿using BasketBall_LiveScore.Exceptions;
+using BasketBall_LiveScore.Hubs;
 using BasketBall_LiveScore.Mappers;
 using BasketBall_LiveScore.Mappers.Impl;
 using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Repositories;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BasketBall_LiveScore.Services.Impl
 {
@@ -13,14 +15,24 @@ namespace BasketBall_LiveScore.Services.Impl
         private readonly IPlayerRepository PlayerRepository;
         private readonly IUserRepository UserRepository;
         private readonly IMatchMapper MatchMapper;
+        private readonly IHubContext<MatchHub> HubContext;
 
-        public MatchService(IMatchRepository matchRepository, ITeamRepository teamRepository, IUserRepository userRepository, IMatchMapper matchMapper, IPlayerRepository playerRepository)
+        public MatchService
+            (
+                IMatchRepository matchRepository, 
+                ITeamRepository teamRepository, 
+                IUserRepository userRepository, 
+                IMatchMapper matchMapper, 
+                IPlayerRepository playerRepository, 
+                IHubContext<MatchHub> hubContext
+            )
         {
             MatchRepository = matchRepository;
             PlayerRepository = playerRepository;
             TeamRepository = teamRepository;
             UserRepository = userRepository;
             MatchMapper = matchMapper;
+            HubContext = hubContext;
         }
 
         public async Task<MatchDto> Create(MatchCreateDto match)
@@ -36,13 +48,16 @@ namespace BasketBall_LiveScore.Services.Impl
             }
             var newMatch = MatchMapper.ConvertToEntity(match, hosts, visitors, prepEncoder);
             newMatch = await MatchRepository.Create(newMatch);
-            return MatchMapper.ConvertToDto(newMatch);
+            var resultMatch = MatchMapper.ConvertToDto(newMatch);
+            await HubContext.Clients.All.SendAsync("MatchsUpdated", resultMatch);
+            return resultMatch;
         }
 
         public async Task Delete(Guid id)
         {
             var match = await MatchRepository.GetById(id) ?? throw new ConflictException($"Match {id} has already been deleted or does not exist");
             await MatchRepository.Delete(match);
+            await HubContext.Clients.All.SendAsync("MatchRemoved", id);
         }
 
         public async IAsyncEnumerable<MatchDto> GetAll()
@@ -50,8 +65,6 @@ namespace BasketBall_LiveScore.Services.Impl
             var matchs = MatchRepository.GetAll() ?? throw new NotFoundException("No matchs currently available");
             await foreach (var match in matchs)
             {
-                Console.WriteLine(match.Id);
-                Console.WriteLine(match.Hosts.Id);
                 yield return MatchMapper.ConvertToDto(match);
             }
         }
@@ -132,7 +145,9 @@ namespace BasketBall_LiveScore.Services.Impl
             var incomingPlayers = newEncoders.Select(encoderId => encodersDictionary[encoderId]);
             match = await MatchRepository.RemovePlayEncoders(match, leavingEncoders);
             match = await MatchRepository.AddPlayEncoders(match, incomingPlayers);
-            return MatchMapper.ConvertToDto(match);
+            var matchDto = MatchMapper.ConvertToDto(match);
+            await HubContext.Clients.All.SendAsync("MatchsUpdated", matchDto);
+            return matchDto;
         }
 
         public async Task<MatchDto> UpdatePrepDetails(Guid id, MatchUpdatePrepDto matchDto)
@@ -152,7 +167,9 @@ namespace BasketBall_LiveScore.Services.Impl
             Team? visitors = matchDto.VisitorsId.HasValue ? (await TeamRepository.GetById(matchDto.VisitorsId.Value) ?? throw new NotFoundException($"Team {matchDto.VisitorsId.Value} not found")) : null; ;
 
             match = await MatchRepository.UpdatePrepDetails(match, hosts, visitors, prepEncoder, matchDto.QuarterDuration, matchDto.QuarterNumber, matchDto.TimeoutDuration, matchDto.HasStarted);
-            return MatchMapper.ConvertToDto(match);
+            var resultDto = MatchMapper.ConvertToDto(match);
+            await HubContext.Clients.All.SendAsync("MatchsUpdated", resultDto);
+            return resultDto;
         }
 
         public async Task<MatchDto> UpdateVisitorsStartingPlayers(Guid id, MatchUpdateListDto startingPlayersChangesDto)
@@ -187,7 +204,7 @@ namespace BasketBall_LiveScore.Services.Impl
             var match = await MatchRepository.GetById(id) ?? throw new NotFoundException($"Match {id} not found");
             if (match.IsFinished) throw new UnauthorizedException("Cannot update a finished match");
             var targetFieldPlayers = isHostTeam ? match.HostsStartingPlayers : match.VisitorsStartingPlayers;
-            if (removedStartingPlayers.Any(player => !targetFieldPlayers.Select(matchEncoder => matchEncoder.Id).Contains(player)))
+            if (removedStartingPlayers.Any(player => !targetFieldPlayers.Select(fieldPlayer => fieldPlayer.Id).Contains(player)))
                 throw new BadRequestException("Trying to remove players who are not already on field");
 
             var teamId = isHostTeam ? match.HostsId : match.VisitorsId;
@@ -213,7 +230,9 @@ namespace BasketBall_LiveScore.Services.Impl
             match = isHostTeam
                 ? await MatchRepository.AddHostStartingPlayers(match, incomingPlayers)
                 : await MatchRepository.AddVisitorStartingPlayers(match, incomingPlayers);
-            return MatchMapper.ConvertToDto(match);
+            var matchDto = MatchMapper.ConvertToDto(match);
+            await HubContext.Clients.All.SendAsync("MatchsUpdated", matchDto);
+            return matchDto;
         }
 
         private static void ValidateRequestIds(IEnumerable<Guid> newEntities, IEnumerable<Guid> removedEntities, string duplicateError, string conflictError)

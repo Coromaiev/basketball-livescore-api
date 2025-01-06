@@ -91,3 +91,22 @@ public class PlayerChange : MatchEvent
     [Required]
     public Player ReplacingPlayer { get; set; }
 }
+public record MatchEventUpdateDto(TimeSpan? Time, byte? QuarterNumber);
+public abstract record MatchEventCreateDto(TimeSpan Time, byte QuarterNumber, Guid MatchId);
+public abstract record MatchEventDto(Guid Id, TimeSpan Time, byte QuarterNumber, Guid MatchId);
+public record FaultDto(Guid Id, TimeSpan Time, byte QuarterNumber, Guid MatchId, Guid FaultyPlayerId, FaultType FaultType)
+    : MatchEventDto(Id, Time, QuarterNumber, MatchId);
+public record FaultCreateDto(TimeSpan Time, byte QuarterNumber, Guid MatchId, Guid FaultyPlayerId, FaultType FaultType)
+    : MatchEventCreateDto(Time, QuarterNumber, MatchId);
+public record ScoreChangeDto(Guid Id, TimeSpan Time, byte QuarterNumber, Guid MatchId, Guid ScorerId, Points Points)
+    : MatchEventDto(Id, Time, QuarterNumber, MatchId);
+public record ScoreChangeCreateDto(TimeSpan Time, byte QuarterNumber, Guid MatchId, Guid ScorerId, Points Points)
+    : MatchEventCreateDto(Time, QuarterNumber, MatchId);
+public record TimeOutDto(Guid Id, TimeSpan Time, byte QuarterNumber, Guid MatchId, Guid InvokerId)
+    : MatchEventDto(Id, Time, QuarterNumber, MatchId);
+public record TimeOutCreateDto(TimeSpan Time, byte QuarterNumber, Guid MatchId, Guid InvokerId)
+    : MatchEventCreateDto(Time, QuarterNumber, MatchId);
+public record PlayerChangeDto(Guid Id, TimeSpan Time, byte QuarterNumber, Guid MatchId, Guid LeavingPlayerId, Guid ReplacingPlayerId)
+    : MatchEventDto(Id, Time, QuarterNumber, MatchId);
+public record PlayerChangeCreateDto(TimeSpan Time, byte QuarterNumber, Guid MatchId, Guid LeavingPlayerId, Guid ReplacingPlayerId)
+    : MatchEventCreateDto(Time, QuarterNumber, MatchId);

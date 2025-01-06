@@ -26,4 +26,16 @@ namespace BasketBall_LiveScore.Mappers
         public User ConvertToEntity(UserCreateDto userDto);
     }
 
+    public interface IMatchEventMapper
+    {
+        public FaultDto ConvertToDto(Fault fault);
+        public PlayerChangeDto ConvertToDto(PlayerChange playerChange);
+        public ScoreChangeDto ConvertToDto(ScoreChange scoreChange);
+        public TimeOutDto ConvertToDto(TimeOut timeOut);
+        public Fault ConvertToEntity(FaultCreateDto faultDto, Match match, Player faultyPlayer);
+        public PlayerChange ConvertToEntity(PlayerChangeCreateDto playerChangeDto, Match match, Player leavingPlayer, Player replacingPlayer);
+        public ScoreChange ConvertToEntity(ScoreChangeCreateDto scoreChangeDto, Match match, Player scorer);
+        public TimeOut ConvertToEntity(TimeOutCreateDto timeOutDto, Match match, Team invoker);
+    }
+
 }

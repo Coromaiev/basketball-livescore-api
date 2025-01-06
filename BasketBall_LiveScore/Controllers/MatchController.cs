@@ -1,6 +1,7 @@
 ﻿using BasketBall_LiveScore.Exceptions;
 using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -40,6 +41,7 @@ namespace BasketBall_LiveScore.Controllers
 
         [Route("encoder/{id:guid}")]
         [HttpGet]
+        [Authorize(Policy = "EncoderAccess")]
         public async Task<IActionResult> GetWithEncoder([FromRoute] Guid id)
         {
             try
@@ -114,11 +116,13 @@ namespace BasketBall_LiveScore.Controllers
             }
         }
 
+        [Authorize(Policy = "EncoderAccess")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] MatchCreateDto match)
         {
             try
             {
+                Console.WriteLine($"{match.HostsId} - {match.VisitorsId}");
                 var newMatch = await MatchService.Create(match);
                 return CreatedAtAction(nameof(Get), new { id = newMatch.Id }, newMatch);
             }
@@ -133,6 +137,7 @@ namespace BasketBall_LiveScore.Controllers
             }
         }
 
+        [Authorize(Policy = "MatchAssignmentPolicy")]
         [Route("{id}/prep")]
         [HttpPut]
         public async Task<IActionResult> UpdatePrep([FromRoute] Guid id, [FromBody] MatchUpdatePrepDto matchUpdateDto)
@@ -155,6 +160,7 @@ namespace BasketBall_LiveScore.Controllers
 
         [Route("{id:guid}/play")]
         [HttpPut]
+        [Authorize(Policy = "MatchAssignmentPolicy")]
         public async Task<IActionResult> UpdatePlay([FromRoute] Guid id, [FromBody] MatchUpdatePlayDto matchUpdatePlayDto)
         {
             try
@@ -175,6 +181,7 @@ namespace BasketBall_LiveScore.Controllers
 
         [Route("{id:guid}/encoders")]
         [HttpPut]
+        [Authorize(Policy = "EncoderAccess")]
         public async Task<IActionResult> UpdateEncoders([FromRoute] Guid id, [FromBody] MatchUpdateListDto playEncodersChanges)
         {
             try
@@ -195,7 +202,8 @@ namespace BasketBall_LiveScore.Controllers
 
         [Route("{id:guid}/players:{team:alpha}")]
         [HttpPut]
-        public async Task<IActionResult> UpdateHostsPlayers([FromRoute] Guid id, [FromRoute] string team, MatchUpdateListDto playersChanges)
+        [Authorize(Policy = "MatchAssignmentPolicy")]
+        public async Task<IActionResult> UpdateTeamPlayers([FromRoute] Guid id, [FromRoute] string team, MatchUpdateListDto playersChanges)
         {
             try
             {
@@ -225,6 +233,7 @@ namespace BasketBall_LiveScore.Controllers
 
         [Route("{id:guid}")]
         [HttpDelete]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             try

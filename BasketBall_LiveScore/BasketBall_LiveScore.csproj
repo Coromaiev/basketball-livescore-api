@@ -20,4 +20,14 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Mocks\MockData\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Mocks\MockData\teams.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

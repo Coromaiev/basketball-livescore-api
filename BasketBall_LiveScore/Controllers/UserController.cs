@@ -1,6 +1,7 @@
 ﻿using BasketBall_LiveScore.Exceptions;
 using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -67,6 +68,7 @@ namespace BasketBall_LiveScore.Controllers
             }
         }
 
+        [Authorize(Policy = "AuthenticationRequired")]
         [Route("{id:guid}")]
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UserUpdateDto user, [FromRoute] Guid id)
@@ -89,6 +91,7 @@ namespace BasketBall_LiveScore.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [Route("{id:guid}")]
         [HttpDelete]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
@@ -109,6 +112,7 @@ namespace BasketBall_LiveScore.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [Route("{id:guid}")]
         [HttpGet]
         public async Task<IActionResult> Get([FromRoute] Guid id)
@@ -129,6 +133,7 @@ namespace BasketBall_LiveScore.Controllers
             }
         }
 
+        [Authorize(Policy = "Authorize")]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] Role? role = null)
         {
