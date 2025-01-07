@@ -1,7 +1,11 @@
 ﻿using BasketBall_LiveScore.Exceptions;
+using BasketBall_LiveScore.Hubs;
+using BasketBall_LiveScore.Mappers;
 using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Repositories;
+using Microsoft.AspNetCore.SignalR;
 using System.Data.SqlTypes;
+using System.Numerics;
 
 namespace BasketBall_LiveScore.Services.Impl
 {
@@ -9,11 +13,21 @@ namespace BasketBall_LiveScore.Services.Impl
     {
         private readonly IPlayerRepository PlayerRepository;
         private readonly ITeamRepository TeamRepository;
+        private readonly IPlayerMapper PlayerMapper;
+        private readonly IHubContext<PlayerHub> HubContext;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository)
+        public PlayerService
+            (
+                IPlayerRepository playerRepository, 
+                ITeamRepository teamRepository, 
+                IPlayerMapper playerMapper,
+                IHubContext<PlayerHub> hubContext
+            )
         {
             PlayerRepository = playerRepository;
             TeamRepository = teamRepository;
+            PlayerMapper = playerMapper;
+            HubContext = hubContext;
         }
 
         public async Task<PlayerDto?> Create(PlayerCreateDto player)
@@ -21,19 +35,21 @@ namespace BasketBall_LiveScore.Services.Impl
             Team? team = null;
             if (player.TeamId.HasValue && player.Number.HasValue)
             {
-                team = await TeamRepository.GetById(player.TeamId.Value) ?? throw new NotFoundException("Could not find team of new player");
-                if (!IsNumberValidForTeam(team, player.Number.Value))
+                team = await TeamRepository.GetById(player.TeamId.Value) ?? throw new NotFoundException("Could not find team of new p");
+                if (!IsNumberValidForTeam(team, player.Number.Value, null))
                 {
-                    throw new ConflictException($"Provided player number is already used among team {team.Name}");
+                    throw new ConflictException($"Provided p number is already used among team {team.Name}");
                 }
             }
-            else if (player.TeamId.HasValue) throw new BadRequestException("Number is required when assigning a player to a team");
+            else if (player.TeamId.HasValue) throw new BadRequestException("Number is required when assigning a p to a team");
             
-            var newPlayer = ConvertToEntity(player);
+            var newPlayer = PlayerMapper.ConvertToEntity(player);
             newPlayer.Team = team;
             newPlayer = await PlayerRepository.Create(newPlayer);
             if (team is not null) await TeamRepository.AddPlayer(team, newPlayer);
-            return ConvertToDto(newPlayer);
+            var playerDto = PlayerMapper.ConvertToDto(newPlayer);
+            await HubContext.Clients.All.SendAsync("PlayersUpdated", playerDto);
+            return playerDto;
         }
 
         public async Task Delete(Guid id)
@@ -44,30 +60,31 @@ namespace BasketBall_LiveScore.Services.Impl
                 await TeamRepository.RemovePlayer(player.Team, player);
             }
             await PlayerRepository.Delete(player);
+            await HubContext.Clients.All.SendAsync("PlayerRemoved", id);
         }
 
-        public async IAsyncEnumerable<PlayerDto?> GetAll()
+        public async IAsyncEnumerable<PlayerDto> GetAll()
         {
             var players = PlayerRepository.GetAll() ?? throw new NotFoundException("No players currently available");
             await foreach (var player in players)
             {
-                yield return ConvertToDto(player);
+                yield return PlayerMapper.ConvertToDto(player);
             }
         }
 
         public async Task<PlayerDto?> GetById(Guid id)
         {
             var player = await PlayerRepository.GetById(id) ?? throw new NotFoundException($"Player with id {id} not found");
-            return ConvertToDto(player);
+            return PlayerMapper.ConvertToDto(player);
         }
 
-        public async IAsyncEnumerable<PlayerDto?> GetByTeam(Guid teamId)
+        public async IAsyncEnumerable<PlayerDto> GetByTeam(Guid teamId)
         {
             var team = await TeamRepository.GetById(teamId) ?? throw new NotFoundException($"Team {teamId} does not exist");
-            var teamPlayers = PlayerRepository.GetByTeam(teamId) ?? throw new NotFoundException($"Team {teamId} does not have any player");
+            var teamPlayers = PlayerRepository.GetByTeam(teamId) ?? throw new NotFoundException($"Team {teamId} does not have any p");
             await foreach (var player in teamPlayers)
             {
-                yield return ConvertToDto(player);
+                yield return PlayerMapper.ConvertToDto(player);
             }
         }
 
@@ -75,24 +92,24 @@ namespace BasketBall_LiveScore.Services.Impl
         {
             var playerToUpdate = await PlayerRepository.GetById(id) ?? throw new NotFoundException($"Player {id} not found");
 
-            // Trying to perform a player team transfer
+            // Trying to perform a p team transfer
             if (updatedPlayer.TeamId.HasValue && updatedPlayer.Number.HasValue)
             {
                 var newTeam = await TeamRepository.GetById(updatedPlayer.TeamId.Value) ?? throw new NotFoundException($"Could not find team {updatedPlayer.TeamId.Value}");
-                if (!IsNumberValidForTeam(newTeam, updatedPlayer.Number.Value))
+                if (!IsNumberValidForTeam(newTeam, updatedPlayer.Number.Value, playerToUpdate))
                     throw new ConflictException($"The number {updatedPlayer.Number.Value} is already assigned in team {newTeam.Id}");
                 if (playerToUpdate.Team is not null)
                 {
                     await TeamRepository.RemovePlayer(playerToUpdate.Team, playerToUpdate);
                 }
                 await TeamRepository.AddPlayer(newTeam, playerToUpdate);
-            } // Else : trying to update the player number inside their team
-            else if (updatedPlayer.Number.HasValue && playerToUpdate.Team is not null && !IsNumberValidForTeam(playerToUpdate.Team, updatedPlayer.Number.Value))
+            } // Else : trying to update the p number inside their team
+            else if (updatedPlayer.Number.HasValue && playerToUpdate.Team is not null && !IsNumberValidForTeam(playerToUpdate.Team, updatedPlayer.Number.Value, playerToUpdate))
             {
                 throw new BadRequestException($"Number {updatedPlayer.Number.Value} is already assigned in team {playerToUpdate.Team.Id}");
-            } // Else : trying to perform a player team transfer without providing a number into that new team
+            } // Else : trying to perform a p team transfer without providing a number into that new team
             else if ((updatedPlayer.TeamId.HasValue && !updatedPlayer.Number.HasValue) || (updatedPlayer.Number.HasValue && playerToUpdate.Team is null))
-                throw new BadRequestException("A number value is required when assigning a player to a new team. A number cannot be assigned to a player without a team");
+                throw new BadRequestException("A number value is required when assigning a p to a new team. A number cannot be assigned to a p without a team");
 
             var player = await PlayerRepository.Update
                 (
@@ -102,42 +119,22 @@ namespace BasketBall_LiveScore.Services.Impl
                     updatedPlayer.FirstName,
                     updatedPlayer.LastName
                 );
-            return ConvertToDto(player);
+            var playerDto = PlayerMapper.ConvertToDto(player);
+            await HubContext.Clients.All.SendAsync("PlayersUpdated", playerDto);
+            return playerDto;
         }
 
         public async Task<PlayerDto?> UpdateQuitTeam(Guid id)
         {
             var playerToUpdate = await PlayerRepository.GetById(id) ?? throw new NotFoundException($"Player with id {id} not found");
-            if (playerToUpdate.Team is null) throw new ConflictException($"Cannot remove player {id} from their team. No team assigned");
+            if (playerToUpdate.Team is null) throw new ConflictException($"Cannot remove p {id} from their team. No team assigned");
             await TeamRepository.RemovePlayer(playerToUpdate.Team, playerToUpdate);
             playerToUpdate = await PlayerRepository.RemoveTeam(playerToUpdate);
-            return ConvertToDto(playerToUpdate);
-        }
-
-        private static PlayerDto ConvertToDto(Player player)
-        {
-            PlayerDto playerDto = new(
-                    player.Id,
-                    player.FirstName,
-                    player.LastName,
-                    player.TeamId,
-                    player.Number
-                );
+            var playerDto = PlayerMapper.ConvertToDto(playerToUpdate);
+            await HubContext.Clients.All.SendAsync("PlayersUpdated", playerDto);
             return playerDto;
         }
 
-        private static Player ConvertToEntity(PlayerCreateDto playerDto)
-        {
-            Player player = new()
-            {
-                FirstName = playerDto.FirstName,
-                LastName = playerDto.LastName,
-                TeamId = playerDto.TeamId,
-                Number = playerDto.Number,
-            };
-            return player;
-        }
-
-        private static bool IsNumberValidForTeam(Team team, byte number) => !team.Players.Any(player => player.Number == number);
+        private static bool IsNumberValidForTeam(Team team, byte number, Player? player) => !team.Players.Any(p => p.Number == number && !p.Id.Equals(player?.Id));
     }
 }

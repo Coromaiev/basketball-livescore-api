@@ -26,11 +26,6 @@ namespace BasketBall_LiveScore.Infrastructure
             modelBuilder.Entity<PlayerChange>().HasBaseType<MatchEvent>();
 
             modelBuilder.Entity<Match>()
-                .HasOne(match => match.PlayEncoder)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Match>()
                 .HasOne(match => match.PrepEncoder)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
@@ -39,6 +34,15 @@ namespace BasketBall_LiveScore.Infrastructure
                 .HasOne(match => match.Hosts)
                 .WithMany()
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Match>()
+                .HasOne(match => match.Winner)
+                .WithMany()
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Match>()
+                .HasMany(match => match.PlayEncoders)
+                .WithMany();
 
             modelBuilder.Entity<Match>()
                 .HasMany(match => match.HostsStartingPlayers)

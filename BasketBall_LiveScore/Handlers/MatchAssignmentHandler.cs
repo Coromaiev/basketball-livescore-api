@@ -25,6 +25,12 @@ namespace BasketBall_LiveScore.Handlers
             }
             var userRole = context.User.FindFirstValue(ClaimTypes.Role);
 
+            if (userRole.Equals("Admin"))
+            {
+                context.Succeed(requirement);
+                return Task.CompletedTask;
+            }
+
             if (!userRole.Equals("Encoder"))
             {
                 context.Fail();
@@ -44,10 +50,10 @@ namespace BasketBall_LiveScore.Handlers
             }
 
             var match = MatchService.GetById(matchId).Result;
-            bool isPrepEncoder = match.PrepEncoderId.Equals(userId);
-            bool isMainEncoder = match.PlayEncoderId.Equals(userId);
+            bool isPrepEncoder = match.PrepEncoder is not null && match.PrepEncoder.Id.Equals(userId);
+            bool isPlayEncoder = match.PlayEncoders.Any(encoderId => encoderId.Equals(userId));
 
-            if ((action.Equals("prepare") && isPrepEncoder) || (action.Equals("play") && isMainEncoder))
+            if ((action.Equals("prepare") && isPrepEncoder) || (action.Equals("play") && isPlayEncoder))
             {
                 context.Succeed(requirement);
             } else

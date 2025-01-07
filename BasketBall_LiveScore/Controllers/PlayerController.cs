@@ -2,6 +2,7 @@
 using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Repositories.Impl;
 using BasketBall_LiveScore.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -46,6 +47,7 @@ namespace BasketBall_LiveScore.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create([FromBody] PlayerCreateDto playerDto)
         {
             try
@@ -87,6 +89,7 @@ namespace BasketBall_LiveScore.Controllers
 
         [Route("{id:guid}")]
         [HttpPut]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Update([FromRoute] Guid id, PlayerUpdateDto playerDto)
         {
             try
@@ -105,6 +108,7 @@ namespace BasketBall_LiveScore.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [Route("{id:guid}/leave")]
         [HttpPut]
         public async Task<IActionResult> LeavePlayerTeam([FromRoute] Guid id)
@@ -125,6 +129,7 @@ namespace BasketBall_LiveScore.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [Route("{id:guid}")]
         [HttpDelete]
         public async Task<IActionResult> Delete([FromRoute] Guid id)

@@ -33,7 +33,7 @@ namespace BasketBall_LiveScore.Repositories.Impl
             await Context.SaveChangesAsync();
         }
 
-        public async IAsyncEnumerable<Team?> GetAll()
+        public async IAsyncEnumerable<Team> GetAll()
         {
             var teams = Context.Teams
                 .Include(team => team.Players)
