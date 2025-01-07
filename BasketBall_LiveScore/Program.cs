@@ -18,10 +18,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<LiveScoreContext>(
     options => options
     .UseSqlServer(builder.Configuration["ConnectionStrings:DefaultConnection"]));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
+builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IPlayerService, PlayerService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
 builder.Services.AddScoped<IAuthorizationHandler, MatchAssignmentHandler>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -78,6 +84,11 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("EncoderAccess", policy => policy.RequireRole("Encoder"));
     options.AddPolicy("MatchAssignmentPolicy", policy => policy.Requirements.Add(new MatchAssignmentRequirement()));
 });
+
+builder.Logging
+    .ClearProviders()
+    .AddConsole()
+    .AddDebug();
 
 var app = builder.Build();
 

@@ -12,33 +12,27 @@ public class Match
     [Required]
     public byte TimeOutDuration { get; set; }
     [Required]
-    public Team? Visitors { get; set; }
+    public Team Visitors { get; set; }
     [Required]
-    public Team? Hosts { get; set; }
+    public Team Hosts { get; set; }
     [Required]
-    public Guid? VisitorsId { get; set; }
+    public Guid VisitorsId { get; set; }
     [Required]
-    public Guid? HostsId { get; set; }
-    [Required]
+    public Guid HostsId { get; set; }
     public User? PrepEncoder { get; set; }
-    [Required]
     public User? PlayEncoder { get; set; }
-    [Required]
     public Guid? PrepEncoderId { get; set; }
-    [Required]
     public Guid? PlayEncoderId { get; set; }
     [Required]
     public ulong HostsScore { get; set; } = 0;
     [Required]
-    public ulong? VisitorsScore { get; set; } = 0;
+    public ulong VisitorsScore { get; set; } = 0;
     [Required]
-    public List<MatchEvent> Events { get; set; } = new();
-    [Required]
+    public List<MatchEvent> Events { get; set; } = [];
     [MaxLength(5)]
-    public List<Player> VisitorsStartingPlayers = new(5); 
-    [Required]
+    public List<Player>? VisitorsStartingPlayers = new(5); 
     [MaxLength(5)]
-    public List<Player> HostsStartingPlayers = new(5);
+    public List<Player>? HostsStartingPlayers = new(5);
 }
 
 // MISSES EVENTS AND STARTING PLAYERS. TEAMS SHOULD HAVE THEIR IDS REPLACED WITH DTOS

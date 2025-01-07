@@ -1,4 +1,5 @@
-﻿using BasketBall_LiveScore.Models;
+﻿using BasketBall_LiveScore.Exceptions;
+using BasketBall_LiveScore.Models;
 using BasketBall_LiveScore.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +16,13 @@ namespace BasketBall_LiveScore.Controllers
     {
         private readonly IConfiguration Configuration;
         private readonly IUserService UserService;
+        private readonly ILogger<UserController> Logger;
 
-        public UserController(IConfiguration configuration, IUserService userService)
+        public UserController(IConfiguration configuration, IUserService userService, ILogger<UserController> logger)
         {
             Configuration = configuration;
             UserService = userService;
+            Logger = logger;
         }
 
         [Route("login")]
@@ -28,17 +31,17 @@ namespace BasketBall_LiveScore.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(login.Email) || string.IsNullOrEmpty(login.Password)) return BadRequest("Email and/or password is missing");
                 var loggedInUser = await UserService.GetByEmailAndPassword(login);
-                if (loggedInUser is null)
-                {
-                    return Unauthorized("Email or password is invalid");
-                }
                 var tokenString = GenerateToken(loggedInUser);
                 return Ok(new { token = tokenString, user = loggedInUser});
             }
+            catch (ApiException ex)
+            {
+                return StatusCode((int)ex.StatusCode, ex.Message);
+            }
             catch (Exception ex)
             {
+                Logger.LogError(ex, "Unexpected error during login");
                 return StatusCode((int)System.Net.HttpStatusCode.InternalServerError, ex.Message);
             }
         }
@@ -49,20 +52,17 @@ namespace BasketBall_LiveScore.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Password))
-                {
-                    return BadRequest("Email, username and/or password is invalid");
-                }
                 var newUser = await UserService.Create(user);
-                if (newUser is null)
-                {
-                    return Conflict($"{user.Email} is already in use");
-                }
                 var tokenString = GenerateToken(newUser);
                 return CreatedAtAction(nameof(Get), new { id = newUser.Id }, new { token = tokenString, user = newUser});
             }
+            catch (ApiException ex)
+            {
+                return StatusCode((int)ex.StatusCode, ex.Message);
+            }
             catch (Exception ex)
             {
+                Logger.LogError(ex, "Unexpected error while registering");
                 return StatusCode((int)System.Net.HttpStatusCode.InternalServerError, ex.Message);
             }
         }
@@ -73,20 +73,20 @@ namespace BasketBall_LiveScore.Controllers
         {
             try
             {
-                if ((!string.IsNullOrEmpty(user.NewPassword) || !string.IsNullOrEmpty(user.NewEmail)) && string.IsNullOrEmpty(user.CurrentPassword))
-                    return BadRequest("Current password is required to update email or password");
+                Logger.LogDebug(user.ToString());
                 var updatedUser = await UserService.Update(id, user);
-                if (updatedUser is null)
-                {
-                    return NotFound($"No user found with id {id}");
-                }
                 return NoContent();
 
-            } catch (Exception ex)
+            }
+            catch (ApiException ex)
             {
+                return StatusCode((int)ex.StatusCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Unexpected error while performing update");
                 return StatusCode((int)System.Net.HttpStatusCode.InternalServerError, ex.Message);
             }
-
         }
 
         [Route("{id:guid}")]
@@ -95,12 +95,16 @@ namespace BasketBall_LiveScore.Controllers
         {
             try
             {
-                var user = await UserService.GetById(id);
-                if (user is null) return NotFound($"No user found with id {id}");
                 await UserService.Delete(id);
                 return NoContent();
-            } catch (Exception ex)
+            }
+            catch (ApiException ex)
             {
+                return StatusCode((int)ex.StatusCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Unexpected error while deleting");
                 return StatusCode((int)System.Net.HttpStatusCode.InternalServerError, ex.Message);
             }
         }
@@ -112,12 +116,16 @@ namespace BasketBall_LiveScore.Controllers
             try
             {
                 var user = await UserService.GetById(id);
-                if (user is null) return NotFound($"User with id {id} not found");
                 return Ok(user);
-            } catch (Exception ex)
+            }
+            catch (ApiException ex)
             {
-                
-                return StatusCode((int)System.Net.HttpStatusCode.InternalServerError, "An unexpected error occurred");
+                return StatusCode((int)ex.StatusCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Unexpected error while fetching");
+                return StatusCode((int)System.Net.HttpStatusCode.InternalServerError, ex.Message);
             }
         }
 
@@ -126,15 +134,21 @@ namespace BasketBall_LiveScore.Controllers
         {
             try
             {
-                var users = role.HasValue ? await Task.Run(() => UserService.GetByRole((Role)role)) : await Task.Run(() => UserService.GetAll());
-                if (users is null || !users.Any())
+                var usersList =  new List<UserDto>();
+                var users = role.HasValue ? UserService.GetByRole(role.Value) : UserService.GetAll();
+                await foreach (var user in users)
                 {
-                    var message = "No users found" + (role is not null ? $" with role {role}" : "");
-                    return NotFound(message);
+                    usersList.Add(user);
                 }
-                return Ok(users);
-            } catch (Exception ex)
+                return Ok(usersList);
+            }
+            catch (ApiException ex)
             {
+                return StatusCode((int)ex.StatusCode, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Unexpected error while fetching");
                 return StatusCode((int)System.Net.HttpStatusCode.InternalServerError, ex.Message);
             }
         }

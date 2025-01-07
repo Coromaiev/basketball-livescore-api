@@ -6,15 +6,16 @@ using System.Text.Json.Serialization;
 namespace BasketBall_LiveScore.Models;
 public abstract class MatchEvent
 {
+    [Required]
     public Guid Id { get; set; } = Guid.NewGuid();
     [Required]
     public TimeSpan Time { get; set; }
     [Required]
     public byte QuarterNumber { get; set; }
     [Required]
-    public Guid? MatchId { get; set; }
+    public Guid MatchId { get; set; }
     [Required]
-    public Match? Match { get; set; } = null;
+    public Match Match { get; set; }
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

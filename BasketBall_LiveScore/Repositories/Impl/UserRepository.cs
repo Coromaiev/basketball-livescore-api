@@ -21,10 +21,10 @@ namespace BasketBall_LiveScore.Repositories.Impl
             return user;
         }
 
-        public IEnumerable<User> GetAll()
+        public async IAsyncEnumerable<User> GetAll()
         {
-            var users = Context.Users;
-            foreach (var user in users)
+            var users = Context.Users.AsAsyncEnumerable();
+            await foreach (var user in users)
             {
                 yield return user;
             }
@@ -48,16 +48,16 @@ namespace BasketBall_LiveScore.Repositories.Impl
             return foundUser;
         }
 
-        public IEnumerable<User> GetByRole(Role role)
+        public async IAsyncEnumerable<User> GetByRole(Role role)
         {
-            var usersOfRole = Context.Users.Where(user => user.Permission.Equals(role));
-            foreach (var user in usersOfRole)
+            var usersOfRole = Context.Users.Where(user => user.Permission.Equals(role)).AsAsyncEnumerable();
+            await foreach (var user in usersOfRole)
             {
                 yield return user;
             }
         }
 
-        public async Task<User> Update(User user, string? newPassword, string? newEmail, string? newUsername, Role? newPermission)
+        public async Task<User> Update(User user, string? newEmail, string? newPassword, string? newUsername, Role? newPermission)
         {
             if (!string.IsNullOrEmpty(newPassword)) user.Password = newPassword;
             if (!string.IsNullOrEmpty(newEmail)) user.Email = newEmail;

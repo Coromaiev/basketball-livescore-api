@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BasketBall_LiveScore.Repositories.Impl
 {
-    public class PlayerRepository
+    public class PlayerRepository : IPlayerRepository
     {
         private readonly LiveScoreContext Context;
 
@@ -13,19 +13,72 @@ namespace BasketBall_LiveScore.Repositories.Impl
             Context = context;
         }
 
-        public async Task<Player?> GetById(ulong id)
+        public async Task<Player?> GetById(Guid id)
         {
-            var foundPlayer = await Context.Players.FirstOrDefaultAsync(p => p.Id.Equals(id));
+            var foundPlayer = await Context.Players
+                .Include(player => player.Team)
+                .FirstOrDefaultAsync(p => p.Id.Equals(id));
             return foundPlayer;
         }
 
-        public async IAsyncEnumerable<Player>? GetAll()
+        public async IAsyncEnumerable<Player?> GetAll()
         {
-            foreach (var player in await Context.Players.ToListAsync()) 
+            var players = Context.Players
+                .Include(player => player.Team)
+                .AsAsyncEnumerable();
+            await foreach (var player in players) 
             {
                 yield return player;
             }
 
+        }
+
+        public async IAsyncEnumerable<Player?> GetByTeam(Guid teamId)
+        {
+            var teamPlayers = Context.Players
+                .Where(player => player.TeamId.Equals(teamId))
+                .Include(player => player.Team)
+                .AsAsyncEnumerable();
+            await foreach (var player in teamPlayers)
+            {
+                yield return player;
+            }
+        }
+
+        public async Task<Player> Create(Player player)
+        {
+            await Context.Players.AddAsync(player);
+            await Context.SaveChangesAsync();
+            return player;
+        }
+
+        public async Task<Player> Update(Player player, byte? newNumber, Team? newTeam, string? newFirstName, string? newLastName)
+        {
+            if (newNumber.HasValue) player.Number = newNumber.Value;
+            if (newTeam != null)
+            {
+                player.Team = newTeam;
+                player.TeamId = newTeam.Id;
+            }
+            if (!string.IsNullOrWhiteSpace(newFirstName)) player.FirstName = newFirstName;
+            if (!string.IsNullOrWhiteSpace(newLastName)) player.LastName = newLastName;
+            await Context.SaveChangesAsync();
+            return player;
+        }
+
+        public async Task<Player> RemoveTeam(Player player)
+        {
+            player.Team = null;
+            player.TeamId = null;
+            player.Number = null;
+            await Context.SaveChangesAsync();
+            return player;
+        }
+
+        public async Task Delete(Player player)
+        {
+            Context.Players.Remove(player);
+            await Context.SaveChangesAsync();
         }
     }
 }
