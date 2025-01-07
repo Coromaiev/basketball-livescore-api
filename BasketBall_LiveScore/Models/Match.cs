@@ -48,7 +48,7 @@ public class Match
     [MaxLength(MaxPlayersPerTeam)]
     public List<Player> HostsStartingPlayers = new(MaxPlayersPerTeam);
 }
-public record MatchDto(Guid Id, byte QuarterDuration, byte QuarterNumber, byte TimeoutDuration, TeamDto Visitors, TeamDto Hosts, List<Guid> FieldPlayers, UserDto? PrepEncoder, List<UserDto> PlayEncoders, ulong HostsScore, ulong VisitorsScore , (List<FaultDto> Faults, List<PlayerChangeDto> PlayerChanges, List<ScoreChangeDto> ScoreChanges, List<TimeOutDto> TimeOuts) Events);
+public record MatchDto(Guid Id, byte QuarterDuration, byte QuarterNumber, byte TimeoutDuration, TeamDto Visitors, TeamDto Hosts, List<Guid> FieldPlayers, UserDto? PrepEncoder, List<UserDto> PlayEncoders, ulong HostsScore, ulong VisitorsScore , (List<FaultDto> Faults, List<PlayerChangeDto> PlayerChanges, List<ScoreChangeDto> ScoreChanges, List<TimeOutDto> TimeOuts) Events, bool IsFinished, bool HasStarted, Guid? Winner);
 public record MatchCreateDto(byte? QuarterDuration, byte? QuarterNumber, byte? TimeoutDuration, Guid VisitorsId, Guid HostsId, Guid? PrepEncoderId);
 public record MatchUpdatePrepDto(byte? QuarterDuration, byte? QuarterNumber, byte? TimeoutDuration, Guid? VisitorsId, Guid? HostsId, Guid? PrepEncoderId, bool? HasStarted);
 public record MatchUpdatePlayDto(ulong? VisitorsScore, ulong? HostsScore, bool? IsFinished, Guid? WinnerId);

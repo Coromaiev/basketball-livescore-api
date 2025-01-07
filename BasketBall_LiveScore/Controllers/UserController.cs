@@ -133,7 +133,7 @@ namespace BasketBall_LiveScore.Controllers
             }
         }
 
-        [Authorize(Policy = "Authorize")]
+        [Authorize(Policy = "EncoderAccess")]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] Role? role = null)
         {

@@ -138,7 +138,7 @@ namespace BasketBall_LiveScore.Controllers
         }
 
         [Authorize(Policy = "MatchAssignmentPolicy")]
-        [Route("{id}/prep")]
+        [Route("{id:guid}/prep")]
         [HttpPut]
         public async Task<IActionResult> UpdatePrep([FromRoute] Guid id, [FromBody] MatchUpdatePrepDto matchUpdateDto)
         {

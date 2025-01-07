@@ -38,7 +38,10 @@ namespace BasketBall_LiveScore.Mappers.Impl
                  PlayerChanges: FilterAndConvert<PlayerChange, PlayerChangeDto>(match.Events, MatchEventMapper.ConvertToDto),
                  ScoreChanges: FilterAndConvert<ScoreChange, ScoreChangeDto>(match.Events, MatchEventMapper.ConvertToDto),
                  TimeOuts: FilterAndConvert<TimeOut, TimeOutDto>(match.Events, MatchEventMapper.ConvertToDto)
-                )
+                ),
+                match.IsFinished,
+                match.HasStarted,
+                match.WinnerId
             );
             return matchDto;
         }
