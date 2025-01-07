@@ -3,7 +3,7 @@
 namespace BasketBall_LiveScore.Models;
 public class Team
 {
-    public ulong Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     [MaxLength(255)]
     [Required]
     public string Name { get; set; } = string.Empty;

@@ -38,7 +38,7 @@ namespace BasketBall_LiveScore.Infrastructure
             modelBuilder.Entity<Match>()
                 .HasOne(match => match.Hosts)
                 .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Match>()
                 .HasMany(match => match.HostsStartingPlayers)
@@ -51,37 +51,44 @@ namespace BasketBall_LiveScore.Infrastructure
             modelBuilder.Entity<Match>()
                 .HasOne(match => match.Visitors)
                 .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MatchEvent>()
+                .HasOne(matchEvent => matchEvent.Match)
+                .WithMany(match => match.Events)
+                .HasForeignKey(matchEvent => matchEvent.MatchId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<PlayerChange>()
                 .HasOne(change => change.LeavingPlayer)
                 .WithMany()
-                .HasForeignKey(change => change.LeavingPlayerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<PlayerChange>()
                 .HasOne(change => change.ReplacingPlayer)
                 .WithMany()
-                .HasForeignKey(change => change.ReplacingPlayerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ScoreChange>()
                 .HasOne(scoreChange => scoreChange.Scorer)
                 .WithMany()
-                .HasForeignKey(scoreChange => scoreChange.ScorerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<TimeOut>()
                 .HasOne(timeOut => timeOut.Invoker)
                 .WithMany()
-                .HasForeignKey(timeOut => timeOut.InvokerID)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Fault>()
                 .HasOne(fault => fault.FaultyPlayer)
                 .WithMany()
-                .HasForeignKey(fault => fault.FaultyPlayerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Player>()
+                .HasOne(player => player.Team)
+                .WithMany(team => team.Players)
+                .HasForeignKey(player => player.TeamId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 
