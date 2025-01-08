@@ -24,8 +24,8 @@ namespace BasketBall_LiveScore.Mappers.Impl
                 match.QuarterDuration,
                 match.NumberOfQuarters,
                 match.TimeOutDuration,
-                TeamMapper.ConvertToDto(match.Hosts),
                 TeamMapper.ConvertToDto(match.Visitors),
+                TeamMapper.ConvertToDto(match.Hosts),
                 match.HostsStartingPlayers.Select(player => player.Id)
                                           .Concat(match.VisitorsStartingPlayers.Select(player => player.Id))
                                           .ToList(),

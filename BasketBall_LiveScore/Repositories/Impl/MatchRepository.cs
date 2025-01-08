@@ -63,6 +63,8 @@ namespace BasketBall_LiveScore.Repositories.Impl
                     .ThenInclude(team => team.Players)
                 .Include(match => match.PrepEncoder)
                 .Include(match => match.PlayEncoders)
+                .Include(match => match.HostsStartingPlayers)
+                .Include(match => match.VisitorsStartingPlayers)
                 .AsAsyncEnumerable();
             await foreach (var match in matchs)
             {
@@ -81,6 +83,8 @@ namespace BasketBall_LiveScore.Repositories.Impl
                     .ThenInclude(team => team.Players)
                 .Include(match => match.PrepEncoder)
                 .Include(match => match.PlayEncoders)
+                .Include(match => match.HostsStartingPlayers)
+                .Include(match => match.VisitorsStartingPlayers)
                 .AsAsyncEnumerable();
             await foreach (var encoderMatch in encoderMatchs) { yield return encoderMatch; }
         }
@@ -94,6 +98,8 @@ namespace BasketBall_LiveScore.Repositories.Impl
                     .ThenInclude(team => team.Players)
                 .Include(match => match.PrepEncoder)
                 .Include(match => match.PlayEncoders)
+                .Include(match => match.HostsStartingPlayers)
+                .Include(match => match.VisitorsStartingPlayers)
                 .FirstOrDefaultAsync(m => m.Id.Equals(id));
             return match;
         }
@@ -108,6 +114,8 @@ namespace BasketBall_LiveScore.Repositories.Impl
                     .ThenInclude(team => team.Players)
                 .Include(match => match.PrepEncoder)
                 .Include(match => match.PlayEncoders)
+                .Include(match => match.HostsStartingPlayers)
+                .Include(match => match.VisitorsStartingPlayers)
                 .AsAsyncEnumerable();
             await foreach (var match in teamMatchs)
             {
@@ -125,6 +133,8 @@ namespace BasketBall_LiveScore.Repositories.Impl
                     .ThenInclude(team => team.Players)
                 .Include(match => match.PrepEncoder)
                 .Include(match => match.PlayEncoders)
+                .Include(match => match.HostsStartingPlayers)
+                .Include(match => match.VisitorsStartingPlayers)
                 .AsAsyncEnumerable();
             await foreach (var match in matchs) { yield return match; }
         }
